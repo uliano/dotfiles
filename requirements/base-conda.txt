@@ -1,0 +1,17 @@
+# Base conda environment packages
+# Install with: mamba install -n base <packages>
+
+# Excel and data manipulation
+openpyxl xlsxwriter xlrd xlwt polars pyarrow fastparquet
+
+# Advanced plotting libraries
+altair bokeh plotnine holoviews datashader pyviz_comms param panel streamlit
+
+# Statistical and scientific packages
+pymc arviz emcee corner lifelines pingouin networkx graphviz python-graphviz
+
+# Productivity and utility packages
+papermill nbconvert jupyterlab-git voila faker mimesis sqlalchemy psycopg2 pymongo redis-py httpx aiohttp fastapi uvicorn
+
+# Already included in base installation:
+# numpy pandas matplotlib jupyter notebook requests beautifulsoup4 lxml pillow scikit-learn seaborn plotly ipywidgets tqdm

@@ -1,0 +1,103 @@
+# https://starship.rs/config
+# https://starship.rs/presets/nerd-font.html#configuration
+
+# DEBUG via:
+# starship explain
+# STARSHIP_LOG=trace
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Timeout for commands executed by starship (ms)
+command_timeout = 1000
+
+# newline between commands
+add_newline = false
+
+format = """
+$username$hostname:$directory$git_branch$git_status$git_commit$conda$python$cmd_duration
+$character"""
+
+[line_break]
+disabled = true
+
+# Replace the "❯"
+[character]
+success_symbol = "[❯](yellow bold)"
+error_symbol = "[✘](red)"
+
+[username]
+style_user = "cyan"
+style_root = "red bold"
+format = "[$user]($style)"
+disabled = false
+show_always = true
+
+[hostname]
+ssh_only = false
+format = "[@$hostname](green)"
+disabled = false
+
+# truncation length works backwards (i.e., cwd > parent > parent ...)
+[directory]
+style = "yellow"
+truncation_length = 25
+truncation_symbol = "…/"
+truncate_to_repo = true
+
+[git_branch]
+truncation_length = 25
+truncation_symbol = ''
+
+[git_status]
+ahead = '⇡${count}'
+diverged = '⇕⇡${ahead_count}⇣${behind_count}'
+behind = '⇣${count}'
+staged = '[++\($count\)](green)'
+
+[git_commit]
+commit_hash_length = 4
+
+[env_var.SHELL]
+variable = "SHELL"
+default = "unknown shell"
+disabled = true
+
+[cmd_duration]
+min_time = 500
+format = '[$duration](orange)'
+
+# Conda/Mamba environments (cross-platform)
+[conda]
+truncation_length = 1
+format = "🅒 [$environment]($style) "
+style = "dimmed green"
+ignore_base = true
+
+# Python version detection (clean, portable)
+[python]
+disabled = false
+detect_extensions = ["py"]
+detect_files = [
+    "requirements.txt",
+    "pyproject.toml",
+    "setup.py",
+    "setup.cfg",
+    "Pipfile",
+    ".python-version"
+]
+detect_folders = [
+    "venv",
+    ".venv",
+    "env",
+    ".env"
+]
+pyenv_version_name = false
+format = "🐍[$version]($style) "
+style = "blue"
+
+# Disable noisy modules for performance
+[docker_context]
+disabled = true
+
+[package]
+disabled = true

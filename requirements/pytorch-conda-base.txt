@@ -1,0 +1,15 @@
+# PyTorch CUDA installation commands
+# Run these in the pytorch venv after creating it with --system-site-packages
+
+# 1. Create venv with system-site-packages:
+# python -m venv /home/venvs/pytorch --system-site-packages
+
+# 2. Activate and install PyTorch with CUDA:
+# source /home/venvs/pytorch/bin/activate
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# 3. Install ML packages:
+# pip install transformers datasets accelerate diffusers timm torchmetrics lightning wandb tensorboard huggingface_hub tokenizers safetensors
+
+# Note: CUDA version (cu124) may need adjustment based on your system
+# Check with: nvidia-smi | grep "CUDA Version"
