@@ -28,11 +28,11 @@ chsh -s $(which zsh)
 ```bash
 # Install Miniforge3
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-bash Miniforge3-Linux-x86_64.sh -b -p /home/miniconda3
-/home/miniconda3/bin/conda init zsh
+bash Miniforge3-Linux-x86_64.sh -b -p /home/miniforge3
+/home/miniforge3/bin/conda init zsh
 
 # Configure conda
-/home/miniconda3/bin/conda config --set changeps1 False
+/home/miniforge3/bin/conda config --set changeps1 False
 
 # Install base packages
 mamba install -n base $(cat requirements/base-conda.txt | grep -v '^#' | tr '\n' ' ')

@@ -418,14 +418,14 @@ chsh -s $(which zsh)
 
 **1. Conda Base Environment (mamba)**
 - Pulizia completa installazione precedente
-- Fresh install Miniforge3 in `/home/miniconda3`
+- Fresh install Miniforge3 in `/home/miniforge3`
 - Configurazione `changeps1=False` per nascondere `(base)` nel prompt
 - Popolamento base con 300+ pacchetti scientifici stabili
 
 **2. Environment 3.13 (conda)**
 - Python 3.13.7 bleeding edge in conda environment
 - Pip 25.2 per pacchetti nuovi/sperimentali
-- Posizione: `/home/miniconda3/envs/3.13`
+- Posizione: `/home/miniforge3/envs/3.13`
 
 **3. Environment PyTorch (venv --system-site-packages)**
 - Venv con ereditarietà da base conda (trucco geniale!)
@@ -478,7 +478,7 @@ format = "🅒 [$environment]($style) "
 **ZSH environment listing:**
 ```bash
 show_environments() {
-    local conda_list=$(/home/miniconda3/bin/conda info --envs 2>/dev/null | grep -v '^#' | grep -v '^$' | awk '{print $1}' | tr '\n' ' ')
+    local conda_list=$(/home/miniforge3/bin/conda info --envs 2>/dev/null | grep -v '^#' | grep -v '^$' | awk '{print $1}' | tr '\n' ' ')
     local venvs_list=$(ls -1 /home/venvs 2>/dev/null | tr '\n' ' ')
 
     echo "🅒 Conda envs: $conda_list"

@@ -181,10 +181,7 @@ export FPATH="$HOME/.zfunc:$FPATH"
 # This block will be managed by mamba/conda init
 # Auto-detect common installation paths
 MAMBA_LOCATIONS=(
-    "$HOME/miniforge3/bin/mamba"
-    "$HOME/mambaforge/bin/mamba"
-    "$HOME/miniconda3/bin/mamba"
-    "/opt/miniforge3/bin/mamba"
+    "/home/miniforge3/bin/mamba"
 )
 
 for location in "${MAMBA_LOCATIONS[@]}"; do
@@ -218,7 +215,7 @@ command -v starship >/dev/null && eval "$(starship init zsh)"
 # Show available environments when shell starts
 show_environments() {
     # Get conda environments (skip header lines)
-    local conda_list=$(/home/miniconda3/bin/conda info --envs 2>/dev/null | grep -v '^#' | grep -v '^$' | awk '{print $1}' | tr '\n' ' ')
+    local conda_list=$(/home/miniforge3/bin/conda info --envs 2>/dev/null | grep -v '^#' | grep -v '^$' | awk '{print $1}' | tr '\n' ' ')
 
     # Get venvs
     local venvs_list=$(ls -1 /home/venvs 2>/dev/null | tr '\n' ' ')
@@ -240,14 +237,14 @@ fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/home/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/miniconda3/etc/profile.d/conda.sh"
+    if [ -f "/home/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "/home/miniforge3/etc/profile.d/conda.sh"
     else
-        export PATH="/home/miniconda3/bin:$PATH"
+        export PATH="/home/miniforge3/bin:$PATH"
     fi
 fi
 unset __conda_setup

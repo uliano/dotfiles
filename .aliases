@@ -1,0 +1,40 @@
+# ====================================================================
+# CUSTOM TOOL ALIASES
+# ====================================================================
+# This file contains aliases for custom-compiled tools and utilities
+# Source this file from .zshrc to make aliases available
+
+# ====================================================================
+# OpenOCD STMicroelectronics Custom Build
+# ====================================================================
+# STM32-optimized OpenOCD with full STM32 MCU/MPU support and all ST-Link variants
+#
+# Installation commands used:
+# cd /opt/src
+# git clone https://github.com/STMicroelectronics/OpenOCD.git OpenOCD_STM
+# cd OpenOCD_STM
+# ./bootstrap
+# ./configure --prefix=/opt/openocd_stm
+# make
+# sudo make install
+#
+# Configuration files located in:
+# /opt/openocd_stm/share/openocd/scripts/
+# ├── board/      - Board-specific configurations
+# ├── interface/  - Debugger/programmer configurations (ST-Link, etc.)
+# ├── target/     - Target chip configurations (STM32 families)
+# └── chip/       - Chip-specific scripts
+#
+# Example usage:
+# openocd_stm -f interface/stlink.cfg -f target/stm32f4x.cfg
+# openocd_stm -f board/st_nucleo_f4.cfg
+
+alias openocd_stm='/opt/openocd_stm/bin/openocd'
+
+# ====================================================================
+# FUTURE CUSTOM TOOLS
+# ====================================================================
+# Add other custom-compiled tools here following the same pattern:
+# - Installation commands as comments
+# - Configuration paths and usage examples
+# - Simple alias to the binary
