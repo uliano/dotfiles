@@ -1,518 +1,389 @@
-# Installation Log
+# Installation Log & Reference
 
-Questo documento tiene traccia delle installazioni e configurazioni effettuate su questo sistema.
+Complete installation guide for the development environment based on Bash, PyEnv, and modern CLI tools.
 
-## 📋 Note Metodologiche per Claude
+## System Overview
 
-**Approccio sistematico utilizzato:**
-1. **TodoWrite**: Creare sempre todo list per task complessi, aggiornare in tempo reale lo stato
-2. **Verifica situazione**: Controllare hardware/software esistente prima di procedere
-3. **Installazioni incrementali**: Un componente alla volta, verificare ogni step
-4. **Test completi**: Creare programmi di test per validare funzionalità
-5. **Documentazione dettagliata**: Aggiornare questo file con comandi, risultati, configurazioni finali
-6. **Directory custom**: Usare `/stuff/` per installazioni personalizzate invece dei default
-7. **Environment isolati**: Creare conda environment dedicati per ogni progetto
+**Operating System:** Ubuntu/Debian-based Linux
+**Shell:** Bash with Starship prompt
+**Python Management:** PyEnv
+**Additional Tools:** NVM (Node.js), Cargo (Rust), FZF, eza, bat, fd
 
-**Pattern di lavoro:**
-- Leggere questo file all'inizio per capire lo stato attuale
-- Usare TodoWrite per pianificare e tracciare progresso
-- Testare ogni installazione con programmi dedicati
-- Aggiornare documentazione al completamento
-- Mantenere approccio metodico e incrementale
+---
 
-**Setup attuale completato:**
-- CUDA 12.0.140 + Driver NVIDIA 550.163.01
-- Dual NVIDIA GTX 1080 Ti setup (2 GPU)
-- Driver AMD rimossi (problema SMU risolto)
-- Boot time ottimizzato: plymouth-quit-wait 4.6s (era 1+ minuto)
-- Miniforge da reinstallare in `/home/uliano/.local/miniforge3`
+## 1. Base System Setup
 
-## Hardware
+### Shell Configuration
 
-- **CPU**: [da verificare]
-- **GPU Primary**: NVIDIA GeForce GTX 1080 (8GB VRAM, PCIe 04:00.0) - Display attivo
-- **GPU Secondary**: NVIDIA GeForce GTX 1080 (8GB VRAM, PCIe 0b:00.0) - Compute
-- **Monitor**: 5120x1440 (richiede firmware update NVIDIA per BIOS/GRUB visibility)
-- **OS**: Ubuntu 24.04.3 LTS (Noble)
+Bash is the default shell on most Linux systems. Configuration files:
 
-## CUDA Setup
+- `~/.bashrc` - Main configuration (non-login shells)
+- `~/.bash_profile` - Login shell configuration (sources .bashrc)
+- `~/.aliases` - Custom tool aliases
 
-### Data: 2025-09-13
-
-**Situazione iniziale:**
-- Driver NVIDIA 550.163.01 già installato e funzionante
-- Supporto CUDA 12.4 disponibile dal driver
-- AMD RX 5700 XT gestisce il display
-- CUDA toolkit mancante
-
-**Installazione effettuata:**
+Copy dotfiles:
 ```bash
-sudo apt install nvidia-cuda-toolkit -y
+cd ~/dotfiles
+cp .bashrc ~/.bashrc
+cp .bash_profile ~/.bash_profile
+cp .aliases ~/.aliases
+source ~/.bashrc
 ```
 
-**Risultato:**
-- ✅ CUDA Toolkit 12.0.140 installato
-- ✅ nvcc compiler disponibile
-- ✅ Tutte le librerie CUDA installate
-- ✅ Tool di sviluppo inclusi (Nsight Compute, Nsight Systems, Visual Profiler)
-- ✅ Test di compilazione ed esecuzione superato
+### Bash Features Enabled
 
-**Verifica:**
+- **History**: 1M entries, shared across sessions, ignores duplicates
+- **Completion**: Case-insensitive tab completion
+- **Options**: `globstar`, `autocd`, `nocaseglob`
+- **Modern tools**: Integration with eza, fd, bat
+
+---
+
+## 2. PyEnv Installation
+
+### Install Dependencies
+
 ```bash
-nvcc --version  # CUDA 12.0.140
-nvidia-smi     # GTX 1080 operativa
-# Test program compilato e eseguito con successo
+sudo apt install -y build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev curl git \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
+libffi-dev liblzma-dev
 ```
 
-**Configurazione finale:**
-- AMD RX 5700 XT: Display e rendering grafico
-- NVIDIA GTX 1080: Calcolo CUDA e machine learning
-- Setup ibrido perfettamente funzionante
+### Install PyEnv
 
-## Mouse Configuration
-
-### Data: 2025-09-13
-
-**Problema:** Rotella mouse con scorrimento al contrario
-
-**Soluzione applicata:**
 ```bash
-# Identificazione mouse
-xinput list | grep -i mouse
-# → Logitech Wireless Mouse MX Master 3 (id=11 pointer, id=14 keyboard)
-
-# Inversione rotella (temporanea)
-xinput set-button-map 11 1 2 3 5 4
-
-# Configurazione permanente con rilevamento dinamico ID
-echo '#!/bin/bash' > ~/.xprofile
-echo '# Mouse scroll wheel inversion - find MX Master 3 pointer device dynamically' >> ~/.xprofile
-echo 'MOUSE_ID=$(xinput list | grep "Logitech Wireless Mouse MX Master 3" | grep "slave  pointer" | sed '\''s/.*id=\([0-9]*\).*/\1/'\'')' >> ~/.xprofile
-echo 'if [ -n "$MOUSE_ID" ]; then' >> ~/.xprofile
-echo '    xinput set-button-map $MOUSE_ID 1 2 3 5 4' >> ~/.xprofile
-echo 'fi' >> ~/.xprofile
-chmod +x ~/.xprofile
+curl https://pyenv.run | bash
 ```
 
-**Alternative per GNOME:**
+The installer adds PyEnv to your shell automatically. Our `.bashrc` includes:
+
 ```bash
-gsettings set org.gnome.desktop.peripherals.mouse natural-scroll true
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 ```
 
-**Risultato:**
-- ✅ Rotella mouse invertita immediatamente
-- ✅ Configurazione permanente tramite `.xprofile` con rilevamento dinamico ID
-- ✅ Si attiva automaticamente al login GUI
-- ✅ Fix: Errore "device has no buttons" risolto usando ID corretto del pointer device
+### Install Python
 
-## Miniforge Setup
-
-### Data: 2025-09-13
-
-**Situazione iniziale:**
-- Python di sistema disponibile ma senza package manager conda
-- Necessità di gestione ambienti Python per machine learning
-
-**Installazione effettuata:**
 ```bash
-# Download installer
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+# List available versions
+pyenv install --list | grep "^\s*3\."
 
-# Installazione in directory personalizzata
-bash Miniforge3-Linux-x86_64.sh -b -p /stuff/miniforge3
+# Install Python 3.13.7 (or latest)
+pyenv install 3.13.7
 
-# Inizializzazione bash
-/stuff/miniforge3/bin/conda init bash
+# Set global version
+pyenv global 3.13.7
+
+# Verify
+python --version
+which python  # Should show ~/.pyenv/shims/python
 ```
 
-**Risultato:**
-- ✅ Miniforge3 25.3.1 installato in `/stuff/miniforge3`
-- ✅ Python 3.12.11 incluso
-- ✅ Conda package manager disponibile
-- ✅ Mamba solver per performance migliori
-- ✅ .bashrc modificato automaticamente per PATH
+### Install Base Packages
 
-**Verifica:**
 ```bash
-conda --version  # conda 25.3.1
-python --version # Python 3.12.11 (miniforge)
-which python     # /stuff/miniforge3/bin/python
+pip install --upgrade pip
+pip install openai pydantic httpx tqdm
 ```
 
-**Configurazione finale:**
-- Miniforge installato in `/stuff/miniforge3` invece del default `~/miniforge3`
-- Auto-attivazione conda all'avvio della shell
-- Pronto per installazione pacchetti ML (PyTorch, TensorFlow, etc.)
+### PyEnv Virtual Environments
 
-## PyTorch Environment Setup
+Create project-specific environments:
 
-### Data: 2025-09-13
-
-**Creazione ambiente:**
 ```bash
-# Creazione environment conda dedicato
-conda create -n pytorch python=3.12 -y
+# Create virtualenv
+pyenv virtualenv 3.13.7 myproject
 
-# Attivazione environment
-conda activate pytorch
+# Activate
+pyenv activate myproject
 
-# Installazione PyTorch con supporto CUDA
-conda install pytorch torchvision torchaudio cpuonly -c pytorch -y
-
-# Installazione pacchetti ML principali
-conda install matplotlib scikit-learn pandas jupyter notebook transformers datasets -y
+# Or set local version for directory
+cd ~/myproject
+pyenv local myproject
 ```
 
-**Risultato:**
-- ✅ Environment `pytorch` creato con Python 3.12.11
-- ✅ PyTorch 2.5.1 con supporto CUDA 12.6 installato
-- ✅ TorchVision e TorchAudio per computer vision e audio
-- ✅ Pacchetti ancillari: matplotlib, scikit-learn, pandas, jupyter
-- ✅ Transformers e datasets per NLP e ML
-- ✅ Triton per ottimizzazioni GPU
+---
 
-**Test GPU creato:**
-- Programma completo in `/stuff/test-pytorch/gpu_test.py`
-- Test setup CUDA, operazioni matriciali, training rete neurale
-- Benchmark CPU vs GPU, monitoraggio memoria
-- Grafico performance generato automaticamente
+## 3. Starship Prompt
 
-**Risultati test:**
+### Installation
+
 ```bash
-PyTorch Version: 2.5.1
-CUDA Available: True
-GPU 0: NVIDIA GeForce GTX 1080 (7.9 GB, Compute 6.1)
-
-# Performance GPU vs CPU (matmul 5000x5000):
-- CPU: 0.258s
-- GPU: 0.038s
-- Speedup: ~6.8x
-
-# Neural Network Training: 50 epochs in 0.37s
-# Memory usage: up to 680MB during heavy operations
+wget -qO- https://starship.rs/install.sh | sh -s -- --yes
 ```
 
-**Configurazione finale:**
-- PyTorch environment completamente operativo
-- CUDA 12.6 + cuDNN 9.13 funzionanti
-- GTX 1080 riconosciuta e utilizzabile per ML
-- Test suite completa per validazione setup
+### Configuration
 
-## AMD GPU Power Management Fix
-
-### Data: 2025-09-14
-
-**Problema identificato:**
-- AMD RX 5700 XT con timeout SMU (System Management Unit) ripetuti ogni 4-5 secondi
-- Errori: `SMU: I'm not done with your previous command: SMN_C2PMSG_66:0x0000000D`
-- Causa lunghi timeout all'avvio e spegnimento sistema
-- Power management problematico su PC desktop fisso
-
-**Diagnosi effettuata:**
+Copy the configuration:
 ```bash
-# Analisi kernel logs
-sudo dmesg | grep -i amdgpu
-# → Errori SMU ripetuti, failure su ppfeatures e workload mask
-# → Thermal protection rimane sempre attiva (hardware-level)
+mkdir -p ~/.config
+cp starship.toml ~/.config/starship.toml
 ```
 
-**Tentativi di soluzione:**
-
-1. **Primo tentativo - Configurazione aggressiva (FALLITO)**:
+Starship is initialized at the end of `.bashrc`:
 ```bash
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.runpm=0 amdgpu.dpm=0 amdgpu.bapm=0 processor.max_cstate=1 intel_idle.max_cstate=0 idle=poll intel_pstate=disable amd_pstate=disable"
+command -v starship >/dev/null && eval "$(starship init bash)"
 ```
-- ❌ **Risultato**: Sistema instabile con SMU timeout storm ogni 4-5 secondi
-- ❌ **Boot logs**: `amd_pstate: failed to register with return -19`
-- ❌ **Problema**: Loop infinito di errori SMU, sistema non responsive
 
-2. **Entry GRUB di backup sicura** creata in `/etc/grub.d/40_custom`:
-   - "Ubuntu SAFE (current working config)" - configurazione originale funzionante
-   - Kernel: 6.14.0-29-generic con parametri `quiet splash`
+### Custom Format
 
-3. **Soluzione finale conservativa** in `/etc/default/grub`:
+```
+username@hostname:directory git_info python_version duration
+❯
+```
+
+- **Python**: Shows 🐍 icon with version when in Python project
+- **Git**: Branch, status, commit hash
+- **Duration**: Command execution time (if > 500ms)
+- **No conda**: Removed (using PyEnv instead)
+
+---
+
+## 4. Modern CLI Tools
+
+### Install via apt
+
 ```bash
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.runpm=0"
+sudo apt update
+sudo apt install -y eza bat fd-find fzf
 ```
 
-**Parametro applicato:**
-- `amdgpu.runpm=0` - Solo runtime power management AMD GPU disabilitato
-- CPU power management mantenuto normale per stabilità sistema
+### Tool Replacements
 
-**Risultato atteso:**
-- ✅ Eliminazione timeout SMU specifici
-- ✅ Sistema stabile con power management CPU normale
-- ✅ Performance prevedibili senza compromettere stabilità
-- ✅ Thermal protection hardware sempre attiva
-- ✅ Entry backup "SAFE" sempre disponibile per recovery
+- **eza** → `ls` (with colors, icons, git integration)
+- **bat** → `cat` (with syntax highlighting)
+- **fd** → `find` (faster, simpler syntax)
+- **fzf** → Fuzzy finder (Ctrl+R for history, Ctrl+T for files)
 
-**Configurazione finale:**
-- GRUB default: Solo `amdgpu.runpm=0` (approccio conservativo)
-- GRUB backup: Configurazione sicura originale (`quiet splash`)
-- Comando: `sudo update-grub` eseguito
+### Aliases (auto-configured in .bashrc)
 
-## Hardware Upgrade: Dual GTX 1080 Setup
-
-### Data: 2025-09-16
-
-**Problema risolto definitivamente:** AMD SMU timeout che causava boot lenti (1+ minuto)
-
-**Soluzione radicale applicata:**
-- Rimozione completa AMD RX 5700 XT (causa dei timeout SMU)
-- Installazione dual NVIDIA GTX 1080
-- Setup definitivamente stabile senza timeout AMD
-
-**Configurazione hardware finale:**
 ```bash
-# GPU verificate
-lspci | grep VGA
-# 04:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080]
-# 0b:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080]
-
-nvidia-smi
-# GPU 0: NVIDIA GeForce GTX 1080 (04:00.0) - Display + Compute
-# GPU 1: NVIDIA GeForce GTX 1080 (0b:00.0) - Compute dedicato
+alias ls='eza'
+alias ll='eza -la'
+alias lr='eza -lo --sort=modified'
+alias lrg='eza -lag --sort=modified'
+alias find='fd'
+alias fd='fdfind'  # Ubuntu package name
 ```
 
-**Driver AMD rimossi:**
+---
+
+## 5. Optional: Node.js with NVM
+
 ```bash
-sudo apt remove --autoremove -y xserver-xorg-video-amdgpu
-# Rimossi: xserver-xorg-video-amdgpu, libdrm-amdgpu1, e dipendenze
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source ~/.bashrc
+
+# Install latest LTS
+nvm install --lts
+
+# Verify
+node --version
+npm --version
 ```
 
-**Risultato straordinario:**
-- ✅ Boot time: plymouth-quit-wait da **1+ minuto a 4.6 secondi** 🎉
-- ✅ Zero timeout SMU (problema completamente eliminato)
-- ✅ Dual GPU NVIDIA completamente funzionanti
-- ✅ Monitor 5120x1440 supportato (firmware update required per BIOS visibility)
-- ✅ Setup definitivamente stabile per ML/CUDA workloads
-
-**Cleanup sistema post-upgrade:**
+NVM is auto-initialized in `.bashrc`:
 ```bash
-# Pulizia configurazione GRUB (16 Settembre 2025)
-sudo cp /etc/default/grub /etc/default/grub.backup-before-cleanup
-sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash" #  amdgpu.runpm=0"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub
-sudo update-grub
-
-# Verifica sistema boot
-systemd-analyze verify && grub-install --version
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 ```
 
-**Doublecheck completato:** ✅
-- GRUB: Configurazione pulita, parametri AMD rimossi
-- Pacchetti boot: Tutti essenziali presenti (GRUB EFI, shim, kernel)
-- Initramfs: 72MB integro, zero tracce AMD, NVIDIA inclusi
-- Moduli: NVIDIA loaded correttamente, persistenced attivo su entrambe GPU
-- EFI: Boot files aggiornati, Ubuntu primo in boot order
+---
 
-**Note tecniche importanti:**
-- Firmware NVIDIA: Update necessario per visibilità BIOS/GRUB su monitor ultrawide
-- PRIME: Configurazione "on-demand" mantenuta per compatibilità
-- CUDA: Doppia potenza di calcolo disponibile con dual GPU
+## 6. Optional: Rust with Cargo
 
-## Mouse Configuration
-
-### Data: 2025-09-13
-
-**Problema:** Rotella mouse con scorrimento al contrario
-
-**Soluzione applicata:**
 ```bash
-# Identificazione mouse
-xinput list | grep -i mouse
-# → Logitech Wireless Mouse MX Master 3 (id=14)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# Inversione rotella (temporanea)
-xinput set-button-map 14 1 2 3 5 4
+# Choose: 1) Proceed with installation (default)
+source ~/.bashrc
 
-# Configurazione permanente
-echo '#!/bin/bash' > ~/.xprofile
-echo 'xinput set-button-map 14 1 2 3 5 4' >> ~/.xprofile
-chmod +x ~/.xprofile
+# Verify
+cargo --version
+rustc --version
 ```
 
-**Alternative per GNOME:**
+Cargo is auto-initialized in `.bashrc`:
 ```bash
-gsettings set org.gnome.desktop.peripherals.mouse natural-scroll true
+. "$HOME/.cargo/env"
 ```
 
-**Risultato:**
-- ✅ Rotella mouse invertita immediatamente
-- ✅ Configurazione permanente tramite `.xprofile`
-- ✅ Si attiva automaticamente al login GUI
+---
 
-## Shell Configuration: ZSH + Starship
+## 7. Embedded Development Toolchains
 
-### Data: 2025-09-16
+Pre-configured PATH entries in `.bashrc`:
 
-**Obiettivo:** Configurare shell moderna con prompt avanzato copiando configurazione da macchina remota (192.168.1.167)
-
-**Setup effettuato:**
+### Quantum Leaps Tools
 ```bash
-# Installazione zsh e starship
-sudo apt update && sudo apt install zsh -y
-sudo wget -qO- https://starship.rs/install.sh | sudo sh -s -- --yes
-
-# Copia configurazioni dalla macchina remota
-scp 192.168.1.167:~/.zshrc ~/.zshrc
-scp 192.168.1.167:~/.config/starship.toml ~/.config/starship.toml
+export PATH=/opt/qp/qm/bin:$PATH
 ```
 
-**Configurazione ZSH (.zshrc):**
-- Cross-platform compatibility (macOS/Linux)
-- History avanzato (1M entries, no duplicates)
-- Completion intelligente case-insensitive
-- Aliases moderni con fallback (eza→ls, bat→cat, fd→find)
-- OS detection automatico
-- PATH management intelligente
-- Conda/Mamba auto-detection
-- Platform-specific configurations
-- Starship prompt integration
-
-**Configurazione Starship (starship.toml):**
-- Formato custom: `user@host:path git_info conda python duration`
-- Prompt colorato con simboli Unicode
-- Timeout 1000ms per performance
-- Git status completo (ahead/behind/staged)
-- Conda environment display con icona 🅒
-- Python version detection automatico 🐍
-- Command duration per comandi lenti
-- Moduli Docker/Package disabilitati per performance
-
-**Risultato:**
-- ✅ ZSH installato come shell alternativa
-- ✅ Starship prompt funzionante e configurato
-- ✅ Configurazione cross-platform copiata correttamente
-- ✅ Modern aliases disponibili (eza, bat, fd se installati)
-- ✅ Git integration completo
-- ✅ Conda/Python environment detection
-
-**Attivazione finale:**
+### ARM GCC (STM32, etc.)
 ```bash
-# Per testare immediatamente
-zsh
-
-# Per rendere default (richiede logout/login)
-chsh -s $(which zsh)
+export PATH=/opt/gcc-arm-none-eabi/bin:$PATH
 ```
 
-**Features principali:**
-- Prompt moderno come su macchina remota 192.168.1.167
-- Auto-completion intelligente
-- Git status visuale immediato
-- Environment Python/Conda identificati automaticamente
-- Performance ottimizzate con timeout configurabili
-
-## Modern Python Environment Setup
-
-### Data: 2025-09-16
-
-**Obiettivo:** Creare architettura Python completa con conda + venv ibrida per diversi use case
-
-**Situazione iniziale:**
-- Sistema con dual NVIDIA GTX 1080 funzionanti
-- ZSH + Starship configurati
-- Conda base esistente da ripulire
-
-**Strategia implementata:**
-
-**1. Conda Base Environment (mamba)**
-- Pulizia completa installazione precedente
-- Fresh install Miniforge3 in `/home/miniforge3`
-- Configurazione `changeps1=False` per nascondere `(base)` nel prompt
-- Popolamento base con 300+ pacchetti scientifici stabili
-
-**2. Environment 3.13 (conda)**
-- Python 3.13.7 bleeding edge in conda environment
-- Pip 25.2 per pacchetti nuovi/sperimentali
-- Posizione: `/home/miniforge3/envs/3.13`
-
-**3. Environment PyTorch (venv --system-site-packages)**
-- Venv con ereditarietà da base conda (trucco geniale!)
-- PyTorch 2.6.0 + CUDA 12.4 via pip
-- Stack ML completo senza rompere base
-- Posizione: `/home/venvs/pytorch`
-
-**Installazioni effettuate:**
-
-**Base environment (mamba):**
+### RISC-V WCH GCC (CH32V series)
 ```bash
-# Excel e data manipulation
-mamba install -n base openpyxl xlsxwriter xlrd xlwt polars pyarrow fastparquet
-
-# Plotting avanzato
-mamba install -n base altair bokeh plotnine holoviews datashader pyviz_comms param panel streamlit
-
-# Statistiche avanzate
-mamba install -n base pymc arviz emcee corner lifelines pingouin networkx graphviz python-graphviz
-
-# Produttività e utility
-mamba install -n base papermill nbconvert jupyterlab-git voila faker mimesis sqlalchemy psycopg2 pymongo redis-py httpx aiohttp fastapi uvicorn
+export PATH=/opt/RISC-V-gcc12-wch-v210/bin:$PATH
 ```
 
-**PyTorch environment (pip):**
+---
+
+## 8. Custom Tools & Aliases
+
+### OpenOCD Builds
+
+Two custom OpenOCD builds are aliased in `~/.aliases`:
+
+**STMicroelectronics OpenOCD** (STM32 MCU/MPU):
 ```bash
-source /home/venvs/pytorch/bin/activate
-
-# PyTorch con CUDA 12.4
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-
-# ML stack completo
-pip install transformers datasets accelerate diffusers timm torchmetrics lightning wandb tensorboard huggingface_hub tokenizers safetensors
+alias openocd_stm='/opt/openocd_stm/bin/openocd'
 ```
 
-**Risultato architettura:**
-```
-🅒 Conda envs: base 3.13
-📦 /home/venvs: pytorch
-```
-
-**Configurazioni shell:**
-
-**Starship personalizzazione:**
-```toml
-# Spazio tra icona conda e nome environment
-format = "🅒 [$environment]($style) "
-```
-
-**ZSH environment listing:**
+**WCH OpenOCD** (CH32V RISC-V):
 ```bash
-show_environments() {
-    local conda_list=$(/home/miniforge3/bin/conda info --envs 2>/dev/null | grep -v '^#' | grep -v '^$' | awk '{print $1}' | tr '\n' ' ')
-    local venvs_list=$(ls -1 /home/venvs 2>/dev/null | tr '\n' ' ')
-
-    echo "🅒 Conda envs: $conda_list"
-    echo "📦 /home/venvs: $venvs_list"
-}
+alias openocd_wch='/opt/OpenOCD-wch-v210/bin/openocd'
 ```
 
-**Test PyTorch completato:**
-- ✅ Dual GPU rilevate (2x NVIDIA GTX 1080, 7.9GB each)
-- ✅ CUDA 12.4 + cuDNN 9.1.0 funzionanti
-- ✅ Performance GPU vs CPU: 8-15x speedup
-- ✅ Neural network training: 50 epochs in 0.41s
-- ✅ File test aggiornato: `/home/test-pytorch/gpu_test.py`
+See `.aliases` file for build instructions and usage examples.
 
-**Configurazione finale:**
-- **base**: Ambiente ricchissimo per data science quotidiana
-- **3.13**: Python fresco per sperimentazione e pacchetti nuovi
-- **pytorch**: ML/DL con CUDA + ereditarietà intelligente da base
-- **Prompt**: Informativo e pulito con environment listing all'avvio
-- **GPU**: Dual setup operativo per training pesanti
+---
 
-**Attivazione environments:**
+## 9. FZF Integration
+
+### Installation
 ```bash
-# Conda environments
-conda activate 3.13
-
-# Virtual environment
-source /home/venvs/pytorch/bin/activate
+git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install
 ```
 
-**Setup pronto per:**
-- 📊 Data science e analisi statistiche avanzate
-- 🤖 Machine Learning e Deep Learning con CUDA
-- 🎨 Generative AI (Stable Diffusion, transformers)
-- 📈 Visualizzazioni avanzate (plotnine, altair, bokeh)
-- ⚡ Development API moderne (FastAPI, async)
-- 📚 Jupyter notebooks con estensioni Git
+### Key Bindings (Bash)
+- **Ctrl+R**: Search command history
+- **Ctrl+T**: Search files
+- **Alt+C**: Change directory
+
+Auto-initialized in `.bashrc`:
+```bash
+[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+```
+
+---
+
+## Configuration Files Summary
+
+| File | Purpose |
+|------|---------|
+| `.bashrc` | Main bash configuration |
+| `.bash_profile` | Login shell (sources .bashrc) |
+| `.aliases` | Custom tool aliases |
+| `starship.toml` | Starship prompt config |
+| `.bash_history` | Command history (auto-managed) |
+| `.fzf.bash` | FZF bash integration (auto-generated) |
+
+---
+
+## Migration from Previous Setup
+
+### Changes from Old Configuration
+
+**Shell:**
+- ❌ ZSH → ✅ Bash (simpler, more portable)
+
+**Python:**
+- ❌ Miniforge3/Conda (`/home/miniforge3`) → ✅ PyEnv (`~/.pyenv`)
+- ❌ Hybrid conda + venv → ✅ PyEnv virtualenvs
+- ❌ Multiple conda environments → ✅ PyEnv global + virtualenvs
+
+**Prompt:**
+- ✅ Starship (same, but bash init instead of zsh)
+- ❌ Removed conda module from starship config
+- ✅ Python version display preserved
+
+**Tools:**
+- ✅ All modern tools preserved (eza, bat, fd)
+- ✅ All embedded toolchains preserved
+- ✅ Custom OpenOCD builds preserved
+
+---
+
+## Verification
+
+After setup, verify your environment:
+
+```bash
+# Shell
+echo $SHELL  # /bin/bash
+
+# Python
+python --version  # Python 3.13.7
+which python      # ~/.pyenv/shims/python
+pip list
+
+# Tools
+eza --version
+bat --version
+fd --version
+fzf --version
+
+# Optional
+node --version  # if NVM installed
+cargo --version # if Rust installed
+
+# Starship
+starship --version
+```
+
+---
+
+## Troubleshooting
+
+### Python not found after PyEnv install
+```bash
+# Ensure PyEnv is in PATH
+echo $PYENV_ROOT  # Should show /home/user/.pyenv
+source ~/.bashrc
+```
+
+### Starship not showing Python version
+```bash
+# Check if in Python project
+touch requirements.txt
+# Or create .python-version
+pyenv local 3.13.7
+```
+
+### FZF keybindings not working
+```bash
+# Reinstall with keybindings
+~/.fzf/install --key-bindings --completion --no-update-rc
+source ~/.bashrc
+```
+
+---
+
+## Quick Reference Commands
+
+```bash
+# PyEnv
+pyenv versions              # List installed versions
+pyenv global 3.13.7         # Set global version
+pyenv virtualenv NAME       # Create virtualenv
+pyenv activate NAME         # Activate virtualenv
+pyenv local NAME            # Set local version for directory
+
+# NVM
+nvm list                    # List installed Node versions
+nvm install --lts          # Install latest LTS
+nvm use VERSION            # Switch version
+
+# Starship
+starship config            # Edit config
+starship explain           # Debug prompt
+starship toggle <module>   # Toggle module
+```

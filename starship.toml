@@ -14,7 +14,7 @@ command_timeout = 1000
 add_newline = false
 
 format = """
-$username$hostname:$directory$git_branch$git_status$git_commit$conda$python$cmd_duration
+$username$hostname:$directory$git_branch$git_status$git_commit$python$cmd_duration
 $character"""
 
 [line_break]
@@ -65,13 +65,6 @@ disabled = true
 [cmd_duration]
 min_time = 500
 format = '[$duration](orange)'
-
-# Conda/Mamba environments (cross-platform)
-[conda]
-truncation_length = 1
-format = "🅒 [$environment]($style) "
-style = "dimmed green"
-ignore_base = true
 
 # Python version detection (clean, portable)
 [python]

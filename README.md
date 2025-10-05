@@ -1,6 +1,6 @@
 # Uliano's Dotfiles
 
-Modern development environment setup with ZSH, Starship, and Python ML environments.
+Modern development environment setup with Bash, Starship, and PyEnv for Python.
 
 ## Quick Setup
 
@@ -8,107 +8,115 @@ Modern development environment setup with ZSH, Starship, and Python ML environme
 
 ```bash
 # Copy dotfiles
-cp .zshrc ~/.zshrc
+cp .bashrc ~/.bashrc
+cp .bash_profile ~/.bash_profile
 cp starship.toml ~/.config/starship.toml
+cp .aliases ~/.aliases
 
-# Install dependencies
-sudo apt install zsh -y
+# Install Starship prompt
 wget -qO- https://starship.rs/install.sh | sh -s -- --yes
 
-# Install modern tools
-sudo apt install eza bat fd-find -y
-
-# Switch to ZSH (optional)
-chsh -s $(which zsh)
+# Install modern CLI tools
+sudo apt install eza bat fd-find fzf -y
 ```
 
-### 2. Python Environment Architecture
+### 2. Python Environment with PyEnv
 
-**Base Environment (conda):**
+**Install PyEnv:**
 ```bash
-# Install Miniforge3
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-bash Miniforge3-Linux-x86_64.sh -b -p /home/miniforge3
-/home/miniforge3/bin/conda init zsh
+# Install dependencies
+sudo apt install -y build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev curl git \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 
-# Configure conda
-/home/miniforge3/bin/conda config --set changeps1 False
+# Install PyEnv
+curl https://pyenv.run | bash
 
-# Install base packages
-mamba install -n base $(cat requirements/base-conda.txt | grep -v '^#' | tr '\n' ' ')
+# PyEnv will be initialized automatically via .bashrc
 ```
 
-**Python 3.13 Environment:**
+**Install Python and set global version:**
 ```bash
-mamba create -n 3.13 python=3.13 pip -y
+# Install Python 3.13.7 (or latest)
+pyenv install 3.13.7
+
+# Set as global version
+pyenv global 3.13.7
+
+# Verify
+python --version  # Should show Python 3.13.7
+which python      # Should show ~/.pyenv/shims/python
 ```
 
-**PyTorch + CUDA Environment:**
+**Install base packages:**
 ```bash
-# Create venv with system-site-packages inheritance
-python -m venv /home/venvs/pytorch --system-site-packages
-source /home/venvs/pytorch/bin/activate
-
-# Check CUDA version
-nvidia-smi | grep "CUDA Version"
-
-# Install PyTorch (adjust cu124 based on your CUDA version)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-
-# Install ML packages
-pip install transformers datasets accelerate diffusers timm torchmetrics lightning wandb tensorboard huggingface_hub tokenizers safetensors
+# Essential packages
+pip install openai pydantic httpx tqdm
 ```
 
-### 3. Test GPU Setup
+### 3. Optional: Additional Development Tools
 
+**Node.js with NVM:**
 ```bash
-source /home/venvs/pytorch/bin/activate
-python gpu_test.py
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+# NVM will be initialized automatically via .bashrc
 ```
 
-## Environment Overview
-
-After setup, you'll have:
-
-```
-🅒 Conda envs: base 3.13
-📦 /home/venvs: pytorch
-```
-
-- **base**: Rich scientific environment (300+ packages)
-- **3.13**: Bleeding edge Python for experimentation
-- **pytorch**: ML/DL with CUDA + inheritance from base
-
-## Activation
-
+**Rust with Cargo:**
 ```bash
-# Conda environments
-conda activate 3.13
-
-# Virtual environment
-source /home/venvs/pytorch/bin/activate
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Cargo will be initialized automatically via .bashrc
 ```
 
 ## Features
 
-- **ZSH + Starship**: Modern shell with Git integration
-- **Environment listing**: Shows available environments on shell start
-- **Modern tools**: eza, bat, fd for enhanced CLI experience
-- **CUDA Support**: Dual GPU setup ready for ML/DL
-- **Hybrid approach**: conda stability + pip flexibility
+- **Bash**: Modern bash configuration with history, completion, and modern tools
+- **Starship**: Fast, customizable prompt with Git integration and Python version display
+- **PyEnv**: Flexible Python version management
+- **Modern CLI tools**: eza (ls replacement), bat (cat replacement), fd (find replacement)
+- **FZF**: Fuzzy finder integration
+- **Custom aliases**: Tool-specific aliases loaded from `.aliases`
 
 ## Files
 
-- `.zshrc`: ZSH configuration with modern tools and environment listing
-- `starship.toml`: Custom prompt configuration
-- `gpu_test.py`: PyTorch CUDA functionality test
-- `install.md`: Complete installation log and reference
-- `requirements/`: Package lists for each environment
+- `.bashrc`: Main bash configuration with PyEnv, NVM, Cargo integration
+- `.bash_profile`: Login shell configuration (sources .bashrc)
+- `.aliases`: Custom tool aliases (OpenOCD variants, etc.)
+- `starship.toml`: Starship prompt configuration
+- `gpu_test.py`: PyTorch CUDA functionality test (if using GPU)
 
-## Hardware Requirements
+## Python Version Display
 
-- NVIDIA GPU with CUDA support
+The Starship prompt automatically shows the Python version when in a Python project:
+- Detects `requirements.txt`, `pyproject.toml`, `.python-version`, etc.
+- Shows active virtual environment if present
+- Format: `🐍3.13.7`
+
+## Custom Aliases
+
+The `.aliases` file includes:
+- **openocd_stm**: STMicroelectronics OpenOCD build for STM32 development
+- **openocd_wch**: WCH OpenOCD build for CH32V RISC-V microcontrollers
+- Add your custom tools following the documented pattern
+
+## Embedded Development Toolchains
+
+Pre-configured PATH for:
+- Quantum Leaps QM tools (`/opt/qp/qm/bin`)
+- ARM GCC toolchain (`/opt/gcc-arm-none-eabi/bin`)
+- RISC-V WCH GCC toolchain (`/opt/RISC-V-gcc12-wch-v210/bin`)
+
+## System Requirements
+
 - Ubuntu/Debian-based system
 - Git installed
+- Bash 4.0+ (for modern features like `autocd`)
 
-For detailed setup process and troubleshooting, see `install.md`.
+For detailed installation logs and troubleshooting, see `install.md`.
+
+## Migration Notes
+
+This configuration migrated from:
+- **ZSH → Bash**: Simpler, more portable, better compatibility
+- **Conda/Miniforge → PyEnv**: Lightweight, flexible Python version management
+- All history and modern features preserved
