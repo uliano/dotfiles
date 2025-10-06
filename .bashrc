@@ -152,21 +152,85 @@ export LANG=en_US.UTF-8
 # Safety: some config tools prefer bash
 export CONFIG_SHELL=/bin/bash
 
+# ====================================================================
+# OS DETECTION
+# ====================================================================
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export OS_TYPE="macos"
+elif [[ "$OSTYPE" == "linux"* ]]; then
+    export OS_TYPE="linux"
+fi
+
+# ====================================================================
+# PLATFORM SPECIFIC CONFIGURATIONS
+# ====================================================================
+if [[ "$OS_TYPE" == "macos" ]]; then
+    # ================== macOS SPECIFIC ==================
+
+    # Homebrew - check if brew exists at standard location
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+
+    # VS Code
+    [[ -d "/Applications/Visual Studio Code.app" ]] && \
+        alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code'
+
+    # VMD
+    export VMD=/Applications/VMD.app
+    alias vmd='$VMD/Contents/Resources/VMD.app/Contents/MacOS/VMD'
+    alias catdcd='$VMD/Contents/vmd/plugins/MACOSXX86_64/bin/catdcd5.2/catdcd'
+
+    # MOE
+    export MOE=/Applications/moe2022/
+    alias moe='$MOE/bin/moe'
+    alias licenze81='$MOE/lm/bin/lmutil lmstat -c $MOE/license.81 -a'
+    alias licenze128='$MOE/lm/bin/lmutil lmstat -c $MOE/license.128 -a'
+
+    # Schrodinger
+    export SCHRODINGER=/opt/schrodinger/suites2025-3/
+    export SCHRODINGER_SCRIPTS=/opt/schrodinger/schrodinger_utils/scripts
+    alias schrun='$SCHRODINGER/run'
+
+    # Python scripts (commented - adjust path as needed)
+    [[ -d "/opt/python_scripts" ]] && export PATH="/opt/python_scripts:$PATH"
+
+elif [[ "$OS_TYPE" == "linux" ]]; then
+    # ================== LINUX SPECIFIC ==================
+
+    # VS Code (various installation methods)
+    command -v code >/dev/null || {
+        [[ -f "/usr/bin/code" ]] && alias code='/usr/bin/code'
+        [[ -f "/snap/bin/code" ]] && alias code='/snap/bin/code'
+    }
+
+    # Add common Linux paths
+    [[ -d "/usr/local/bin" ]] && export PATH="/usr/local/bin:$PATH"
+
+fi
+
+# Common embedded toolchains (both platforms)
 # Quantum Leaps tools
-export PATH=/opt/qp/qm/bin:$PATH
+[[ -d "/opt/qp/qm/bin" ]] && export PATH=/opt/qp/qm/bin:$PATH
 
 # Embedded ARM GCC toolchain
-export PATH=/opt/gcc-arm-none-eabi/bin:$PATH
+[[ -d "/opt/gcc-arm-none-eabi/bin" ]] && export PATH=/opt/gcc-arm-none-eabi/bin:$PATH
 
 # RISC-V WCH GCC toolchain
-export PATH=/opt/RISC-V-gcc12-wch-v210/bin:$PATH
+[[ -d "/opt/RISC-V-gcc12-wch-v210/bin" ]] && export PATH=/opt/RISC-V-gcc12-wch-v210/bin:$PATH
 
-# PyEnv
+# ====================================================================
+# PYENV CONFIGURATION
+# ====================================================================
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+if command -v pyenv >/dev/null; then
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+fi
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert

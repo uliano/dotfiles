@@ -1,17 +1,44 @@
 # Uliano's Dotfiles
 
-Modern development environment setup with Bash, Starship, and PyEnv for Python.
+Cross-platform development environment setup with Bash, Starship, and PyEnv for Python.
+Supports both **macOS** and **Linux**.
 
 ## Quick Setup
 
 ### 1. Shell Configuration
 
+**macOS:**
 ```bash
-# Copy dotfiles
-cp .bashrc ~/.bashrc
-cp .bash_profile ~/.bash_profile
-cp starship.toml ~/.config/starship.toml
-cp .aliases ~/.aliases
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Bash (macOS uses old bash 3.x by default)
+brew install bash
+
+# Add Homebrew bash to allowed shells
+sudo sh -c 'echo "/opt/homebrew/bin/bash" >> /etc/shells'
+
+# Set as default shell
+chsh -s /opt/homebrew/bin/bash
+
+# Create symlinks to dotfiles
+ln -sf "$(pwd)/.bashrc" ~/.bashrc
+ln -sf "$(pwd)/.bash_profile" ~/.bash_profile
+mkdir -p ~/.config
+ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
+
+# Install Starship prompt and modern CLI tools
+brew install starship eza bat fd fzf
+```
+
+**Linux:**
+```bash
+# Create symlinks to dotfiles
+ln -sf "$(pwd)/.bashrc" ~/.bashrc
+ln -sf "$(pwd)/.bash_profile" ~/.bash_profile
+mkdir -p ~/.config
+ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
+ln -sf "$(pwd)/.aliases" ~/.aliases
 
 # Install Starship prompt
 wget -qO- https://starship.rs/install.sh | sh -s -- --yes
@@ -22,7 +49,15 @@ sudo apt install eza bat fd-find fzf -y
 
 ### 2. Python Environment with PyEnv
 
-**Install PyEnv:**
+**macOS:**
+```bash
+# Install PyEnv via Homebrew
+brew install pyenv pyenv-virtualenv
+
+# PyEnv will be initialized automatically via .bashrc
+```
+
+**Linux:**
 ```bash
 # Install dependencies
 sudo apt install -y build-essential libssl-dev zlib1g-dev \
@@ -70,9 +105,10 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ## Features
 
+- **Cross-platform**: Automatic OS detection (macOS/Linux) with platform-specific configurations
 - **Bash**: Modern bash configuration with history, completion, and modern tools
 - **Starship**: Fast, customizable prompt with Git integration and Python version display
-- **PyEnv**: Flexible Python version management
+- **PyEnv**: Flexible Python version management (replaces Conda/Mamba)
 - **Modern CLI tools**: eza (ls replacement), bat (cat replacement), fd (find replacement)
 - **FZF**: Fuzzy finder integration
 - **Custom aliases**: Tool-specific aliases loaded from `.aliases`
@@ -106,8 +142,27 @@ Pre-configured PATH for:
 - ARM GCC toolchain (`/opt/gcc-arm-none-eabi/bin`)
 - RISC-V WCH GCC toolchain (`/opt/RISC-V-gcc12-wch-v210/bin`)
 
+## Platform-Specific Features
+
+### macOS
+- Homebrew integration and PATH configuration
+- VS Code, VMD, MOE, Schrodinger software aliases
+- macOS-specific tool locations
+
+### Linux
+- Ubuntu/Debian package manager integration
+- Alternative VS Code installation paths (apt, snap)
+- xdg-open alias for 'open' command
+
 ## System Requirements
 
+**macOS:**
+- macOS 10.15+ (Catalina or later)
+- Homebrew package manager
+- Git installed
+- Bash 5.0+ (via Homebrew)
+
+**Linux:**
 - Ubuntu/Debian-based system
 - Git installed
 - Bash 4.0+ (for modern features like `autocd`)
@@ -116,7 +171,13 @@ For detailed installation logs and troubleshooting, see `install.md`.
 
 ## Migration Notes
 
-This configuration migrated from:
-- **ZSH → Bash**: Simpler, more portable, better compatibility
-- **Conda/Miniforge → PyEnv**: Lightweight, flexible Python version management
-- All history and modern features preserved
+**Migration from Conda/Mamba to PyEnv (October 2025):**
+- Removed Conda/Miniforge in favor of PyEnv for lighter, more flexible Python management
+- ZSH configuration backup created in `~/.zsh_backup/`
+- Changed default shell from ZSH to Bash
+- All configurations ported to cross-platform `.bashrc`
+
+**Why this setup?**
+- **ZSH → Bash**: Simpler, more portable, better compatibility across systems
+- **Conda/Miniforge → PyEnv**: Lightweight, flexible Python version management without heavy base environments
+- **Cross-platform**: Single `.bashrc` works on both macOS and Linux with automatic OS detection
