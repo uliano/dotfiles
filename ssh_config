@@ -1,0 +1,91 @@
+# Root access to cluster nodes - uses xlence-id-ed25519 key
+Match user root host xlence,xlence2,node*,ngs,licensebox,elenuar,licsrv,192.168.60.*,159.149.32.*
+    IdentityFile ~/.ssh/xlence-id-ed25519
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host *
+  ServerAliveInterval 60
+  ForwardAgent yes
+  Compression yes
+
+Host github.com
+  Hostname github.com
+  Port 22
+  IdentityFile ~/.ssh/id_ed25519
+
+Host pi
+  HostName 192.168.1.111
+  User pi
+
+Host mele
+  Hostname 192.168.1.21
+
+Host riscv
+  HostName 192.168.1.22
+  User uliano
+
+Host orange3b
+  HostName 192.168.1.23
+  User uliano
+
+Host xlence2
+  Hostname 159.149.32.14
+  User uliano.guerrini
+
+Host xlence
+  HostName 159.149.32.133
+  User uliano.guerrini
+  
+Host jane
+  HostName 159.149.32.105
+  User uliano
+
+ Host nero
+  HostName 159.149.32.106
+  User uliano
+
+ Host cita
+  HostName 159.149.32.116
+  User uliano
+
+Host huey
+  HostName 159.149.32.124
+  User uliano
+
+Host dewey
+  HostName 159.149.32.125
+  User uliano
+
+Host louie
+  HostName 159.149.32.126
+  User uliano
+
+Host licsrv
+  HostName 159.149.32.128
+  User uliano
+
+Host licensebox
+  HostName 159.149.32.129
+  User uliano
+
+Host elenuar
+  HostName 159.149.32.81
+  User uliano
+
+Host logbook
+  HostName 159.149.32.127
+
+Host indaco1
+  HostName login1ng.indaco.unimi.it
+  ProxyJump indaco
+  User uliano.guerrini
+
+Host indaco2
+  HostName login1ng.indaco.unimi.it
+  ProxyJump indaco
+  User uliano.guerrini
+
+Host indaco
+  Hostname loginng.indaco.unimi.it
+  User uliano.guerrini
