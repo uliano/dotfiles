@@ -14,7 +14,7 @@ command_timeout = 1000
 add_newline = false
 
 format = """
-$username$hostname:$directory$git_branch$git_status$git_commit$python$cmd_duration
+$username$hostname:$directory$git_branch$git_status$git_commit$conda$python$cmd_duration
 $character"""
 
 [line_break]
@@ -87,6 +87,13 @@ detect_folders = [
 pyenv_version_name = false
 format = "🐍[$version]($style) "
 style = "blue"
+
+# Conda environment detection
+[conda]
+disabled = false
+format = "🅒[$environment]($style) "
+style = "green bold"
+ignore_base = true
 
 # Disable noisy modules for performance
 [docker_context]
