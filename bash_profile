@@ -2,3 +2,4 @@
 
 # Source .bashrc if it exists (ensures all non-login shell configs are loaded)
 [[ -f ~/.bashrc ]] && source ~/.bashrc
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"

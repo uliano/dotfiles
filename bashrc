@@ -142,6 +142,7 @@ export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 
 # Conditionally add neovim if exists
 [[ -d "$HOME/neovim/bin" ]] && export PATH="$HOME/neovim/bin:$PATH"
+[[ -d "$HOME/.npm-global/bin" ]] && export PATH="$HOME/.npm-global/bin:$PATH"
 
 # ====================================================================
 # LOCALE
