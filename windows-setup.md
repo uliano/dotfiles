@@ -4,7 +4,7 @@
 Configurazione ambiente di sviluppo Windows per replicare setup Linux/macOS usando dotfiles esistenti.
 
 **Obiettivi:**
-1. File cross-platform (starship.toml) → symlink da dotfiles/
+1. File cross-platform (starship.toml, ssh_config) → symlink da dotfiles/
 2. Analizzare bashrc per capire tool usati → installare equivalenti Windows
 3. Creare nuovo profilo PowerShell → salvarlo in dotfiles/ e symlinkarlo
 4. Mantenere simmetria tra Linux/Mac e Windows dove possibile
@@ -15,9 +15,9 @@ C:\Users\uliano\dotfiles\
 ├── .aliases                             # Alias custom (openocd_stm, ecc.)
 ├── bash_profile                         # Bash profile (Linux/Mac)
 ├── bashrc                               # Bash config principale (Linux/Mac)
-├── starship.toml                        # Config Starship (cross-platform!)
-├── Microsoft.PowerShell_profile.ps1     # PowerShell profile (Windows) ✅ NUOVO
-├── ssh_config                           # Config SSH
+├── starship.toml                        # Config Starship (cross-platform!) ✅
+├── Microsoft.PowerShell_profile.ps1     # PowerShell profile (Windows) ✅
+├── ssh_config                           # Config SSH (cross-platform!) ✅
 ├── windows-setup.md                     # Documentazione setup Windows
 └── README.md                            # Documentazione generale
 ```
@@ -134,6 +134,24 @@ python script.py         # Secondo suggerimento in ListView
 - Impostata a `RemoteSigned` per CurrentUser
 - Comando usato: `pwsh -NoProfile -Command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force"`
 
+## SSH Config ✅ COMPLETATO
+
+**Posizione:**
+- File sorgente: `C:\Users\uliano\dotfiles\ssh_config`
+- Symlink: `C:\Users\uliano\.ssh\config` → dotfiles
+
+**Host configurati:**
+- GitHub (con chiave id_ed25519)
+- Host locali (pi, mele, riscv, orange3b)
+- Server UNIMI (xlence, xlence2, indaco, indaco1, indaco2)
+- Server lab (jane, nero, cita, huey, dewey, louie, licsrv, licensebox, elenuar, logbook)
+
+**Opzioni globali:**
+- ServerAliveInterval: 60 (keep-alive)
+- ForwardAgent: yes (per chiavi SSH)
+- Compression: yes
+- ServerAliveCountMax: 3
+
 ## Comandi Symlink ✅ COMPLETATI
 
 **Nota:** Developer Mode attivo, ma `sudo` è necessario per i symlink.
@@ -147,6 +165,9 @@ sudo powershell -Command "New-Item -ItemType SymbolicLink -Path 'C:\Users\uliano
 
 # PowerShell profile (PowerShell Core 7.x / pwsh) ✅
 sudo powershell -Command "New-Item -ItemType SymbolicLink -Path 'C:\Users\uliano\Documents\PowerShell\Microsoft.PowerShell_profile.ps1' -Target 'C:\Users\uliano\dotfiles\Microsoft.PowerShell_profile.ps1'"
+
+# SSH config ✅
+sudo powershell -Command "New-Item -ItemType SymbolicLink -Path 'C:\Users\uliano\.ssh\config' -Target 'C:\Users\uliano\dotfiles\ssh_config'"
 ```
 
 ## Problemi Risolti
@@ -172,13 +193,15 @@ sudo powershell -Command "New-Item -ItemType SymbolicLink -Path 'C:\Users\uliano
 1. ✅ ~~Aprire nuova PowerShell e creare symlink per starship.toml~~ - COMPLETATO
 2. ✅ ~~Installare i tool rimanenti uno alla volta con conferma~~ - COMPLETATO
 3. ✅ ~~Creare e configurare PowerShell profile~~ - COMPLETATO
-4. **Testare l'ambiente** - Aprire una nuova finestra PowerShell/pwsh e verificare:
+4. ✅ ~~Creare symlink per SSH config~~ - COMPLETATO
+5. **Testare l'ambiente** - Aprire una nuova finestra PowerShell/pwsh e verificare:
    - `python --version` → dovrebbe mostrare Python 3.13.7
    - `eza --version` → dovrebbe funzionare con alias `ls`, `ll`, ecc.
    - `fd --version` → disponibile come `find`
    - `fzf --version` → fuzzy finder
    - `rg --version` → ripgrep
    - `bat --version` → cat migliorato
+   - `ssh -G xlence` → configurazione SSH dovrebbe funzionare
    - Starship prompt dovrebbe essere attivo e colorato
    - Alias personalizzati (`..`, `...`, `hist`, ecc.) dovrebbero funzionare
 
@@ -198,6 +221,9 @@ gh --version
 ls  # dovrebbe usare eza
 ll  # dovrebbe mostrare ls -la con eza
 ..  # dovrebbe tornare alla directory parent
+
+# Test SSH config
+ssh -G xlence  # dovrebbe mostrare config per xlence
 
 # Autenticazione GitHub (opzionale)
 gh auth login
