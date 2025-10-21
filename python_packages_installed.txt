@@ -1,0 +1,146 @@
+# Pacchetti Python installati nell'ambiente pyenv 3.13.7
+# Data installazione: 2025-10-21
+# Solo pacchetti PRINCIPALI installati manualmente (non dipendenze)
+
+## FASE 1: Giganti (pacchetti con molte dipendenze)
+mdanalysis==2.10.0
+rdkit==2025.9.1
+scikit-learn==1.7.2
+jupyterlab==4.4.9
+statsmodels==0.14.5
+
+## FASE 2: Pacchetti Medi
+opencv-python==4.12.0.88
+scikit-image==0.25.2
+xgboost==3.1.0
+lightgbm==4.6.0
+seaborn==0.13.2
+plotnine==0.15.0
+nglview==4.0
+pdfplumber==0.11.7
+reportlab==4.4.4
+pingouin==0.5.5
+pyarrow==21.0.0
+
+## FASE 3: Pacchetti Leggeri
+polars==1.34.0
+openpyxl==3.1.5
+xlrd==2.0.2
+odfpy==1.4.1
+pypdf==6.1.2
+pyside6==6.10.0
+pytest==8.4.2
+
+## Pacchetti già presenti (installati come dipendenze di altri)
+# tqdm==4.67.1 (da mdanalysis)
+# pyyaml==6.0.3 (da jupyterlab)
+
+## TOTALE: 23 pacchetti installati manualmente
+
+## NOTA IMPORTANTE: NumPy 2.3.4 su Windows
+
+Durante l'installazione, opencv-python e nglview hanno richiesto il downgrade di
+numpy da 2.3.4 a 2.2.6 per via del vincolo numpy<2.3.0.
+
+### Investigazione del vincolo:
+
+**opencv-python (github.com/opencv/opencv-python/issues/1122):**
+- Vincolo motivato per LINUX: manylinux2014 vs manylinux_x_y (ABI mismatch)
+- Su WINDOWS: vincolo NON motivato tecnicamente (manylinux è solo Linux)
+- PR #1121 propone fix ma NON è stata merged
+- Maintainer riconoscono il problema ma non hanno rilasciato fix
+
+**nglview:**
+- Vincolo numpy<2.3 presente nei wheel metadata
+- Codice sorgente NON ha questo vincolo (pyproject.toml pulito)
+- Nessuna issue GitHub o discussione tecnica trovata
+- Probabilmente copia conservativa da opencv
+
+### Decisione: UPGRADE a numpy 2.3.4 su Windows
+
+Eseguito: pip install --upgrade "numpy>=2.3.0"
+
+**Risultato:**
+- numpy==2.3.4 installato con successo
+- opencv-python 4.12.0.88: funziona correttamente (test ok)
+- nglview 4.0: funziona correttamente (test ok)
+- MDAnalysis 2.10.0: funziona correttamente (test ok)
+- Nessun breaking change ABI per Windows in numpy 2.3.0
+
+**Conclusione:**
+I vincoli numpy<2.3 su Windows sono eccessivamente conservativi e non hanno
+motivazione tecnica documentata. Su Linux il problema è reale (ABI mismatch),
+ma su Windows non si applica.
+
+pip mostra warning sui conflitti di dipendenze, ma sono "lamentele" del resolver
+senza impatto funzionale reale.
+
+## VERSIONE FINALE NUMPY: 2.3.4 (upgrade rispetto al vincolo dei wheel)
+
+---
+
+## ⚠️ IMPORTANTE: Installazione su LINUX
+
+**Su sistemi Linux, opencv-python DEVE essere compilato dai sorgenti per evitare
+problemi ABI con numpy 2.3.4+**
+
+### Motivo:
+
+Il problema manylinux è REALE su Linux:
+- opencv-python wheel: manylinux2014 (glibc 2.17, del 2014)
+- numpy 2.3.4 wheel: manylinux_2_28 (glibc 2.28, del 2018)
+- ABI mismatch tra le due versioni → rischio crash, memory corruption
+
+Su Windows/macOS questo problema NON esiste (manylinux è solo Linux).
+
+### Soluzione per Linux:
+
+**NON installare opencv-python dal wheel precompilato. Compilare dai sorgenti:**
+
+```bash
+# Rimuovi wheel precompilato se già installato
+pip uninstall opencv-python
+
+# Installa dai SORGENTI (compila localmente)
+pip install --no-binary opencv-python opencv-python
+
+# Oppure per versione headless (senza GUI, più veloce):
+pip install --no-binary opencv-python-headless opencv-python-headless
+```
+
+### Cosa Succede Compilando dai Sorgenti:
+
+1. OpenCV viene compilato SUL TUO sistema (con la TUA versione di glibc)
+2. Si linka a numpy 2.3.4 già installato
+3. Tutto compilato con la stessa toolchain → ABI consistente
+4. Nessun vincolo metadata numpy<2.3.0 (quello è solo nei wheel)
+
+### Requisiti per Compilazione su Linux:
+
+```bash
+# Dipendenze build (Ubuntu/Debian)
+sudo apt install build-essential cmake python3-dev
+
+# Dipendenze build (RHEL/CentOS/Fedora)
+sudo yum install gcc gcc-c++ cmake python3-devel
+
+# Tempo di compilazione: 30min - 2 ore (dipende dal sistema)
+```
+
+### Sistema Minimo per numpy 2.3.4 wheel:
+
+- glibc ≥ 2.28 (Debian 10, Ubuntu 18.04, RHEL 8+)
+- Se hai sistema più vecchio: compila ANCHE numpy dai sorgenti
+
+### Test dopo Installazione:
+
+```bash
+python -c "import cv2; import numpy as np; \
+    print(f'OpenCV: {cv2.__version__}'); \
+    print(f'NumPy: {np.__version__}'); \
+    img = np.zeros((100,100,3), dtype=np.uint8); \
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY); \
+    print('✅ Test OK')"
+```
+
+**NOTA:** Questa procedura sarà testata su Linux per conferma.
