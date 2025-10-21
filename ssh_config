@@ -1,93 +1,49 @@
+Host 159.149.32.14
+  HostName 159.149.32.14
+
+  Host github.com
+    Hostname github.com
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+
+
 Host *
-  ServerAliveInterval 60
   ForwardAgent yes
-  Compression yes
-  ServerAliveCountMax 3
-
-
-Host github.com
-  Hostname github.com
-  Port 22
-  IdentityFile ~/.ssh/id_ed25519
-
-Host pi
-  HostName 192.168.1.111
-  User pi
-
-Host mele
-  Hostname 192.168.1.21
-
-Host riscv
-  HostName 192.168.1.22
-  User uliano
-
-Host orange3b
-  HostName 192.168.1.23
-  User uliano
 
 Host xlence2
-  Hostname 159.149.32.14
-  User uliano.guerrini
-  ForwardX11 yes
-  ForwardX11Trusted yes
-
-
+  HostName 159.149.32.14
 Host xlence
-  HostName 159.149.32.133
-  User uliano.guerrini
-  ForwardX11 yes
-  ForwardX11Trusted yes
-
-  
-Host jane
-  HostName 159.149.32.105
+  HostName xlence.disfeb.unimi.it
   User uliano
-
- Host nero
-  HostName 159.149.32.106
-  User uliano
-
- Host cita
-  HostName 159.149.32.116
-  User uliano
-
-Host huey
-  HostName 159.149.32.124
-  User uliano
-
-Host dewey
-  HostName 159.149.32.125
-  User uliano
-
-Host louie
-  HostName 159.149.32.126
-  User uliano
-
-Host licsrv
-  HostName 159.149.32.128
-  User uliano
-
-Host licensebox
-  HostName 159.149.32.129
-  User uliano
-
-Host elenuar
-  HostName 159.149.32.81
-  User uliano
-
-Host logbook
-  HostName 159.149.32.127
 
 Host indaco1
   HostName login1ng.indaco.unimi.it
   ProxyJump indaco
   User uliano.guerrini
-
-Host indaco2
-  HostName login2ng.indaco.unimi.it
-  ProxyJump indaco
-  User uliano.guerrini
-
 Host indaco
-  Hostname loginng.indaco.unimi.it
+  HostName loginng.indaco.unimi.it
   User uliano.guerrini
+Host huey
+  HostName 159.149.32.124
+  User uliano
+Host licsrv 
+  Hostname 159.149.32.128
+Host licensebox 
+  Hostname 159.149.32.129
+Host elenuar
+  Hostname 159.149.32.81
+
+
+Host mele
+  HostName 192.168.1.21
+  User uliano
+Host riscv
+  HostName 192.168.1.22
+  User uliano
+Host orange3b
+  HostName 192.168.1.23
+  User uliano
+
+Host trixie
+  HostName 192.168.56.100
+  User uliano
