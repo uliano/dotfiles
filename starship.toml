@@ -85,7 +85,7 @@ detect_folders = [
     ".env"
 ]
 pyenv_version_name = false
-format = '[🐍$version]($style)[ \($virtualenv\)](white) '
+format = '[🐍$version]($style)[( \($virtualenv\))](white) '
 style = "blue"
 
 # Conda environment detection
