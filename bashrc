@@ -3,7 +3,8 @@
 # for examples
 
 # This needs to be before intearctive check to make claude visible to Pycharm remote connection
-[[ -d "$HOME/.npm-global/bin" ]] && export PATH="$HOME/.npm-global/bin:$PATH"
+#[[ -d "$HOME/.npm-global/bin" ]] && export PATH="$HOME/.npm-global/bin:$PATH"
+[[ -d "$HOME/.claude/local/node_modules/.bin" ]] && export PATH="$HOME/.claude/local/node_modules/.bin:$PATH"
 
 # If not running interactively, don't do anything
 case $- in
@@ -138,7 +139,7 @@ command -v fdfind >/dev/null && alias fd='fdfind'  # Ubuntu package name
 # PATH CONFIGURATION
 # ====================================================================
 # Common paths
-export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+#export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 [[ -d "/opt/bin" ]] && export PATH="/opt/bin:$PATH"
 [[ -d "$HOME/bin" ]] && export PATH="$HOME/bin:$PATH"
 [[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"

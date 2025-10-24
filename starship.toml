@@ -14,7 +14,7 @@ command_timeout = 1000
 add_newline = false
 
 format = """
-$username$hostname:$directory$git_branch$git_status$git_commit$conda$python$cmd_duration
+$username$hostname:$directory$git_branch$git_status$git_commit$conda$python$virtualenv$cmd_duration
 $character"""
 
 [line_break]
@@ -94,6 +94,12 @@ disabled = false
 format = "🅒[$environment]($style) "
 style = "green bold"
 ignore_base = true
+
+# Virtual environment detection
+[virtualenv]
+disabled = false
+format = "[($virtualenv)]($style) "
+style = "cyan bold"
 
 # Disable noisy modules for performance
 [docker_context]
