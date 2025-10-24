@@ -85,7 +85,7 @@ detect_folders = [
     ".env"
 ]
 pyenv_version_name = false
-format = "🐍[$version]($style) "
+format = '[🐍$version]($style)[ \($virtualenv\)](white) '
 style = "blue"
 
 # Conda environment detection
@@ -95,11 +95,6 @@ format = "🅒[$environment]($style) "
 style = "green bold"
 ignore_base = true
 
-# Virtual environment detection
-[virtualenv]
-disabled = false
-format = "[($virtualenv)]($style) "
-style = "cyan bold"
 
 # Disable noisy modules for performance
 [docker_context]
