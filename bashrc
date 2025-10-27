@@ -147,6 +147,9 @@ command -v fdfind >/dev/null && alias fd='fdfind'  # Ubuntu package name
 # Conditionally add neovim if exists
 [[ -d "$HOME/neovim/bin" ]] && export PATH="$HOME/neovim/bin:$PATH"
 
+# PlatformIO CLI tool
+[[ -d "$HOME/.platformio/penv/bin" ]] && export PATH="$HOME/.platformio/penv/bin:$PATH"
+
 # ====================================================================
 # LOCALE
 # ====================================================================

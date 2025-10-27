@@ -80,6 +80,12 @@ foreach ($path in $pathsToAdd) {
     }
 }
 
+# Add PlatformIO CLI tool path if it exists
+$platformioPath = "$env:USERPROFILE\.platformio\penv\Scripts"
+if ((Test-Path $platformioPath) -and ($env:PATH -notlike "*$platformioPath*")) {
+    $env:PATH = "$platformioPath;$env:PATH"
+}
+
 # ====================================================================
 # ALIASES - Modern CLI Tools
 # ====================================================================
