@@ -38,6 +38,13 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
     Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 }
 
+# Add PlatformIO CLI tool path if it exists
+# needs to stay above pyenv configuration
+$platformioPath = "$env:USERPROFILE\.platformio\penv\Scripts"
+if ((Test-Path $platformioPath) -and ($env:PATH -notlike "*$platformioPath*")) {
+    $env:PATH = "$platformioPath;$env:PATH"
+}
+
 # ====================================================================
 # PYENV-WIN CONFIGURATION
 # ====================================================================
@@ -78,12 +85,6 @@ foreach ($path in $pathsToAdd) {
     if ((Test-Path $path) -and ($env:PATH -notlike "*$path*")) {
         $env:PATH = "$path;$env:PATH"
     }
-}
-
-# Add PlatformIO CLI tool path if it exists
-$platformioPath = "$env:USERPROFILE\.platformio\penv\Scripts"
-if ((Test-Path $platformioPath) -and ($env:PATH -notlike "*$platformioPath*")) {
-    $env:PATH = "$platformioPath;$env:PATH"
 }
 
 # ====================================================================
