@@ -135,6 +135,15 @@ function .... { Set-Location ..\..\.. }
 function Edit-Profile { code $PROFILE }
 Set-Alias -Name ep -Value Edit-Profile
 
+# moe licenses
+function licenseM { 
+    cmd /c "`"C:\Program Files\moe2024\lm\bin\lmutil`" lmstat -c `"C:\Program Files\moe2024\license.dat`" -a"
+}
+
+function licenseS { 
+    cmd /c "`"C:\Program Files\Schrodinger2025-4\run`" lictool status"
+}
+
 # Reload profile
 function Reload-Profile {
     . $PROFILE
