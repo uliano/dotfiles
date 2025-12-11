@@ -58,12 +58,62 @@ if (Test-Path "$env:PYENV\bin") {
 }
 
 # ====================================================================
-# NVM-WINDOWS CONFIGURATION
+# NVM-WINDOWS CONFIGURATION (DYNAMIC)
 # ====================================================================
-# NVM for Windows sets its own environment variables during installation
-# Verify it's available
-$env:NVM_HOME = "$env:APPDATA\nvm"
+# Check if NVM is in Local (newer install) or Roaming (older install)
+$nvmLocalPath = "$env:USERPROFILE\AppData\Local\nvm"
+$nvmRoamingPath = "$env:APPDATA\nvm"
+
+if (Test-Path $nvmLocalPath) {
+    $env:NVM_HOME = $nvmLocalPath
+} elseif (Test-Path $nvmRoamingPath) {
+    $env:NVM_HOME = $nvmRoamingPath
+}
+
+# Set NVM_SYMLINK (where node.exe symlink should be)
 $env:NVM_SYMLINK = "$env:ProgramFiles\nodejs"
+
+# Add NVM to PATH if it exists
+if ($env:NVM_HOME -and (Test-Path "$env:NVM_HOME\nvm.exe")) {
+    if ($env:PATH -notlike "*$env:NVM_HOME*") {
+        $env:PATH = "$env:NVM_HOME;$env:PATH"
+    }
+    
+    # Auto-activate Node if not already active
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (Get-Command nvm -ErrorAction SilentlyContinue) {
+            # Get first installed version
+            $installedVersions = nvm list | Where-Object { $_ -match '^\s*\d+\.\d+\.\d+' }
+            if ($installedVersions) {
+                $firstVersion = ($installedVersions[0] -replace '\s+', '').Trim()
+                if ($firstVersion) {
+                    nvm use $firstVersion 2>$null | Out-Null
+                }
+            }
+        }
+    }
+    
+    # Always add nodejs symlink path AFTER nvm use (critical for Windows)
+    if ($env:PATH -notlike "*$env:NVM_SYMLINK*") {
+        $env:PATH = "$env:NVM_SYMLINK;$env:PATH"
+    }
+}
+
+# Add npm global packages to PATH
+$npmGlobal = "$env:APPDATA\npm"
+if ((Test-Path $npmGlobal) -and ($env:PATH -notlike "*$npmGlobal*")) {
+    $env:PATH = "$npmGlobal;$env:PATH"
+}
+# Add npm global packages to PATH
+$npmGlobal = "$env:APPDATA\npm"
+if ((Test-Path $npmGlobal) -and ($env:PATH -notlike "*$npmGlobal*")) {
+    $env:PATH = "$npmGlobal;$env:PATH"
+}
+
+# ====================================================================
+# ENVIRONMENT VARIABLES
+# ====================================================================
+$env:LIBCUPL = "C:\WinCUPL\Shared\cupl.dl"
 
 # ====================================================================
 # PATH CONFIGURATION
@@ -78,7 +128,8 @@ if ((Test-Path $wingetLinks) -and ($env:PATH -notlike "*$wingetLinks*")) {
 $pathsToAdd = @(
     "$env:USERPROFILE\bin",
     "$env:USERPROFILE\.local\bin",
-    "$env:USERPROFILE\.cargo\bin"
+    "$env:USERPROFILE\.cargo\bin",
+    "C:\WinCUPL\Shared"
 )
 
 foreach ($path in $pathsToAdd) {
