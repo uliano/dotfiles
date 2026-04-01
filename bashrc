@@ -150,6 +150,10 @@ command -v fdfind >/dev/null && alias fd='fdfind'  # Ubuntu package name
 # PlatformIO CLI tool
 [[ -d "$HOME/.platformio/penv/bin" ]] && export PATH="$HOME/.platformio/penv/bin:$PATH"
 
+# from biostars
+[[ -d "$HOME/edirect" ]] && export PATH="$HOME/edirect:$PATH"
+[[ -d "$HOME/bin/sratoolkit.3.0.0-ubuntu64" ]] && export PATH=~/bin/sratoolkit.3.0.0-ubuntu64/bin:$PATH
+
 # ====================================================================
 # LOCALE
 # ====================================================================
@@ -272,11 +276,24 @@ fi
 # Cargo environment
 . "$HOME/.cargo/env"
 
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+if [[ -d "$HOME/micromamba" ]]; then
+    # >>> mamba initialize >>>
+    # !! Contents within this block are managed by 'micromamba shell init' !!
+    export MAMBA_EXE='/home/uliano/bin/micromamba';
+    export MAMBA_ROOT_PREFIX='/home/uliano/micromamba';
+    __mamba_setup="$("$MAMBA_EXE" shell hook --shell bash --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__mamba_setup"
+    else
+        alias micromamba="$MAMBA_EXE"  # Fallback on help from micromamba activate
+    fi
+    unset __mamba_setup
+    # <<< mamba initialize <<<
+fi
 
 # ====================================================================
 # PROMPT INITIALIZATION (STARSHIP)
@@ -284,3 +301,6 @@ export NVM_DIR="$HOME/.nvm"
 # Initialize starship if available
 # this should be the last in the file
 command -v starship >/dev/null && eval "$(starship init bash)"
+
+
+

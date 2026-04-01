@@ -92,7 +92,7 @@ style = "blue"
 # Conda environment detection
 [conda]
 disabled = false
-format = "🅒[$environment]($style) "
+format = "Ⓒ [$environment]($style) "
 style = "green bold"
 ignore_base = true
 
