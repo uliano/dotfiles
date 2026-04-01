@@ -2,9 +2,6 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-# This needs to be before intearctive check to make claude visible to Pycharm remote connection
-#[[ -d "$HOME/.npm-global/bin" ]] && export PATH="$HOME/.npm-global/bin:$PATH"
-[[ -d "$HOME/.claude/local/node_modules/.bin" ]] && export PATH="$HOME/.claude/local/node_modules/.bin:$PATH"
 
 # If not running interactively, don't do anything
 case $- in
