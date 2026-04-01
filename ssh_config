@@ -9,6 +9,12 @@ Host *
   ForwardAgent yes
   # Compression yes
 
+Host bioinfo
+  HostName 159.149.160.7
+  user MBB26_ugue
+  IdentityFile ~/.ssh/bioinfo
+
+
 Host github.com
   Hostname github.com
   Port 22
@@ -20,6 +26,8 @@ Host pi
 
 Host mele
   Hostname 192.168.1.21
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
 
 Host riscv
   HostName 192.168.1.22

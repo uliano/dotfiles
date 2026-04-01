@@ -191,8 +191,13 @@ function licenseM {
     cmd /c "`"C:\Program Files\moe2024\lm\bin\lmutil`" lmstat -c `"C:\Program Files\moe2024\license.dat`" -a"
 }
 
-function licenseS { 
+function licenseS {
     cmd /c "`"C:\Program Files\Schrodinger2025-4\run`" lictool status"
+}
+
+# Schrodinger run command
+function schrun {
+    & 'C:\Program Files\Schrodinger2025-3\run.exe' $args
 }
 
 # Reload profile
