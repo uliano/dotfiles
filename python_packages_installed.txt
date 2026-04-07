@@ -38,10 +38,11 @@ pytest==8.4.2
 ## PDF → Markdown per LLM
 pymupdf4llm   # leggero e veloce, ottimizzato per LLM (CPU)
 markitdown    # Microsoft, supporta PDF/DOCX/XLSX e altri formati
-docling       # IBM, OCR + tabelle + figure, molto completo (CPU)
-marker-pdf    # qualità massima, usa modelli ML (CPU, torch+cpu)
+docling       # IBM, OCR + tabelle + figure, molto completo (CPU) → GUI: docling serve
+marker-pdf    # qualità massima, usa modelli ML (CPU, torch+cpu) → GUI: marker_gui (Gradio)
+gradio        # necessario per marker_gui
 
-## TOTALE: 27 pacchetti installati manualmente
+## TOTALE: 28 pacchetti installati manualmente
 
 ## NOTA IMPORTANTE: NumPy 2.3.4 su Windows
 
