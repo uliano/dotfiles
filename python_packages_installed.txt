@@ -1,5 +1,5 @@
-# Pacchetti Python installati nell'ambiente pyenv 3.13.7
-# Data installazione: 2025-10-21
+# Pacchetti Python installati nell'ambiente pyenv py314 (Python 3.14.3)
+# Data installazione: 2026-04-07
 # Solo pacchetti PRINCIPALI installati manualmente (non dipendenze)
 
 ## FASE 1: Giganti (pacchetti con molte dipendenze)
@@ -35,7 +35,13 @@ pytest==8.4.2
 # tqdm==4.67.1 (da mdanalysis)
 # pyyaml==6.0.3 (da jupyterlab)
 
-## TOTALE: 23 pacchetti installati manualmente
+## PDF → Markdown per LLM
+pymupdf4llm   # leggero e veloce, ottimizzato per LLM (CPU)
+markitdown    # Microsoft, supporta PDF/DOCX/XLSX e altri formati
+docling       # IBM, OCR + tabelle + figure, molto completo (CPU)
+marker-pdf    # qualità massima, usa modelli ML (CPU, torch+cpu)
+
+## TOTALE: 27 pacchetti installati manualmente
 
 ## NOTA IMPORTANTE: NumPy 2.3.4 su Windows
 
