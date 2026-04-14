@@ -141,6 +141,9 @@ command -v fdfind >/dev/null && alias fd='fdfind'  # Ubuntu package name
 [[ -d "$HOME/bin" ]] && export PATH="$HOME/bin:$PATH"
 [[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
 
+# npm global packages (user install)
+[[ -d "$HOME/.npm-global/bin" ]] && export PATH="$HOME/.npm-global/bin:$PATH"
+
 # Conditionally add neovim if exists
 [[ -d "$HOME/neovim/bin" ]] && export PATH="$HOME/neovim/bin:$PATH"
 
