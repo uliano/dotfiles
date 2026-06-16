@@ -49,6 +49,8 @@ sudo apt install eza bat fd-find fzf -y
 
 ### 2. Python Environment with PyEnv
 
+> **Note — Windows (June 2026):** on the Windows machine **uv** is being trialed as a PyEnv replacement (see [Migration Notes](#migration-notes) and `windows-setup.md`). PyEnv (below) is still the setup on macOS/Linux and on the other Windows machine.
+
 **macOS:**
 ```bash
 # Install PyEnv via Homebrew
@@ -176,6 +178,13 @@ For detailed installation logs and troubleshooting, see `install.md`.
 - ZSH configuration backup created in `~/.zsh_backup/`
 - Changed default shell from ZSH to Bash
 - All configurations ported to cross-platform `.bashrc`
+
+**Experimenting with uv on Windows (June 2026):**
+- On the Windows workstation, trialing [uv](https://docs.astral.sh/uv/) as a single-tool replacement for PyEnv (uv also subsumes venv / pip / pipx).
+- Default "global" environment is a uv venv pinned to Python 3.14 whose `Scripts` dir is prepended to `PATH`, so bare `python` / `pip` / `jupyter` resolve to it — the PyEnv-global feel, **without** activating a venv (keeps the Starship prompt clean).
+- Per-project: `uv venv` (+ `.python-version`); other interpreters via `uv python install <ver>`.
+- Tools that lag on the newest Python (e.g. marker-pdf, pinned to an old Pillow with no 3.14 Windows wheel) are isolated with `uv tool install --python 3.12 <tool>`.
+- **PyEnv remains the Python setup on macOS/Linux and on the other Windows machine** (documented above) — uv is an experiment, not a full switch yet.
 
 **Why this setup?**
 - **ZSH → Bash**: Simpler, more portable, better compatibility across systems
