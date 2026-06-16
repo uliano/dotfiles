@@ -104,11 +104,6 @@ $npmGlobal = "$env:APPDATA\npm"
 if ((Test-Path $npmGlobal) -and ($env:PATH -notlike "*$npmGlobal*")) {
     $env:PATH = "$npmGlobal;$env:PATH"
 }
-# Add npm global packages to PATH
-$npmGlobal = "$env:APPDATA\npm"
-if ((Test-Path $npmGlobal) -and ($env:PATH -notlike "*$npmGlobal*")) {
-    $env:PATH = "$npmGlobal;$env:PATH"
-}
 
 # ====================================================================
 # ENVIRONMENT VARIABLES
@@ -141,12 +136,14 @@ foreach ($path in $pathsToAdd) {
 # ====================================================================
 # ALIASES - Modern CLI Tools
 # ====================================================================
-# Remove built-in PowerShell aliases that conflict with modern tools
-Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
-Remove-Item Alias:cat -Force -ErrorAction SilentlyContinue
+# NOTE: built-in alias removal is done INSIDE each tool's block below, so the
+# native ls/cat aliases are dropped only when their replacement (eza/bat) is
+# actually installed. Otherwise ls/cat would become undefined on a machine that
+# doesn't have eza/bat yet (e.g. a fresh setup).
 
 # eza - Modern replacement for ls
 if (Get-Command eza -ErrorAction SilentlyContinue) {
+    Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
     function ls { eza $args }
     function ll { eza -la $args }
     function lr { eza -lo --sort=modified $args }
@@ -162,6 +159,7 @@ if (Get-Command fd -ErrorAction SilentlyContinue) {
 
 # bat - Cat with syntax highlighting
 if (Get-Command bat -ErrorAction SilentlyContinue) {
+    Remove-Item Alias:cat -Force -ErrorAction SilentlyContinue
     function cat { bat -p $args }  # Plain style, no decorations (easy to copy)
     # bat command stays as-is for full decorated view
 }
