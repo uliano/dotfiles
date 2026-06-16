@@ -39,23 +39,22 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
 }
 
 # Add PlatformIO CLI tool path if it exists
-# needs to stay above pyenv configuration
 $platformioPath = "$env:USERPROFILE\.platformio\penv\Scripts"
 if ((Test-Path $platformioPath) -and ($env:PATH -notlike "*$platformioPath*")) {
     $env:PATH = "$platformioPath;$env:PATH"
 }
 
 # ====================================================================
-# PYENV-WIN CONFIGURATION
+# PYTHON (managed by uv)
 # ====================================================================
-$env:PYENV = "$env:USERPROFILE\.pyenv\pyenv-win"
-$env:PYENV_ROOT = "$env:USERPROFILE\.pyenv\pyenv-win"
-$env:PYENV_HOME = "$env:USERPROFILE\.pyenv\pyenv-win"
-
-# Add pyenv to PATH if not already present
-if (Test-Path "$env:PYENV\bin") {
-    $env:PATH = "$env:PYENV\bin;$env:PYENV\shims;$env:PATH"
-}
+# Python versions & environments are managed by uv (https://docs.astral.sh/uv/).
+# The default "global" environment is the uv venv at ~/.venvs/py314; its Scripts
+# dir is prepended to PATH at the END of the PATH section below, so bare
+# `python`/`pip`/`jupyter`/... resolve to it WITH its packages (this replaces the
+# old pyenv-global setup). We only put it on PATH, we do NOT activate it, so
+# $env:VIRTUAL_ENV stays empty and starship shows no environment name.
+# Per-project work: a local `uv venv` (+ optional `.python-version`) takes over
+# once activated.
 
 # ====================================================================
 # NVM-WINDOWS CONFIGURATION (DYNAMIC)
@@ -131,6 +130,15 @@ foreach ($path in $pathsToAdd) {
     if ((Test-Path $path) -and ($env:PATH -notlike "*$path*")) {
         $env:PATH = "$path;$env:PATH"
     }
+}
+
+# Default uv environment LAST, so its Scripts win over everything prepended
+# above (including the Microsoft Store python stub). PATH only -- NOT activated --
+# so $env:VIRTUAL_ENV stays empty and starship shows no environment name.
+$uvDefaultEnv = "$env:USERPROFILE\.venvs\py314\Scripts"
+if (Test-Path $uvDefaultEnv) {
+    $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -and $_ -ne $uvDefaultEnv }) -join ';'
+    $env:PATH = "$uvDefaultEnv;$env:PATH"
 }
 
 # ====================================================================
