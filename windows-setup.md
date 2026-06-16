@@ -1,5 +1,7 @@
 # Windows Development Environment Setup
 
+> **⚠️ Aggiornamento giugno 2026 — Python ora con uv:** su QUESTA macchina la gestione di Python è passata da **pyenv-win a uv** (vedi [Python con uv (giugno 2026)](#python-con-uv-giugno-2026) in fondo). La sezione **pyenv-win** più sotto è tenuta come **riferimento storico** e descrive il setup ancora in uso sull'**altra macchina Windows**.
+
 ## Contesto
 Configurazione ambiente di sviluppo Windows per replicare setup Linux/macOS usando dotfiles esistenti.
 
@@ -30,7 +32,7 @@ C:\Users\uliano\dotfiles\
    - Config: `C:\Users\uliano\.config\starship.toml` → symlink a `dotfiles/starship.toml`
    - Symlink creato con: `sudo powershell -Command "New-Item -ItemType SymbolicLink ..."`
 
-2. **pyenv-win** (v3.1.1) - Gestione versioni Python
+2. **pyenv-win** (v3.1.1) - Gestione versioni Python  *(⚠️ su questa macchina sostituito da uv — vedi nota in cima e sezione "Python con uv"; resta valido per l'altra macchina Windows)*
    - Installato via script ufficiale (winget non disponibile)
    - Python 3.13.7 installato e configurato come versione globale
    - Variabili d'ambiente configurate (PYENV, PYENV_ROOT, PYENV_HOME)
@@ -228,3 +230,45 @@ ssh -G xlence  # dovrebbe mostrare config per xlence
 # Autenticazione GitHub (opzionale)
 gh auth login
 ```
+
+---
+
+## Python con uv (giugno 2026)
+
+**Variante a pyenv-win adottata su QUESTA macchina.** La sezione *pyenv-win* sopra resta valida per l'altra macchina Windows; qui la sostituisce uv.
+
+**Perché uv:** un solo binario (Rust) che rimpiazza pyenv + venv + pip + pipx, senza il bloat di conda. Nativo su Windows (niente shim/PATH gymnastics come pyenv-win), molto veloce.
+
+### Installazione
+```bash
+winget install --id astral-sh.uv          # uv finisce in WinGet\Links (sul PATH)
+uv python install 3.14 --default           # CPython 3.14 + python/python3 "nudi" in ~/.local/bin
+uv python pin --global 3.14                # versione di default a livello utente
+```
+
+### Ambiente "globale" di default (effetto pyenv-global)
+- venv dedicato, **non** attivato: `uv venv --python 3.14 ~/.venvs/py314`
+- nel profilo PowerShell `~/.venvs/py314/Scripts` è prepeso **in fondo** alla sezione PATH → `python`/`pip`/`jupyter`/… risolvono lì (con i pacchetti) scavalcando lo stub del Microsoft Store
+- è **solo-PATH** (niente `VIRTUAL_ENV`) → starship non mostra il nome ambiente fuori dai progetti python
+- pacchetti: `uv pip install --python ~/.venvs/py314 <pkg…>` (le voci di `python_packages_installed.txt`; numpy 2.4.6, torch CPU, rdkit, …)
+
+### Per-progetto
+`uv venv` (+ `uv python pin <ver>` per una versione diversa) → da attivato ha la precedenza sul default.
+
+### Tool che non supportano l'ultimo Python (es. marker-pdf)
+marker-pdf vincola pillow 10.4.0, **senza wheel per Python 3.14 su Windows** → isolato in un suo ambiente:
+```bash
+uv tool install --python 3.12 marker-pdf   # comandi marker / marker_gui / … in ~/.local/bin
+```
+
+### Mappatura pyenv → uv
+| pyenv | uv |
+|---|---|
+| `pyenv install 3.12` | `uv python install 3.12` |
+| `pyenv global 3.14` | `uv python pin --global 3.14` (+ `--default` per `python` nudo) |
+| `pyenv local 3.11` | `uv python pin 3.11` |
+| `pyenv shell 3.12` | `$env:UV_PYTHON='3.12'` oppure `uv run --python 3.12 …` |
+| `pyenv versions` | `uv python list` |
+
+### Stub Microsoft Store
+`…\WindowsApps\python.exe` è un alias da 0 byte che apre lo Store. Neutralizzato dal prepend del venv sul PATH; in alternativa si spegne in *Impostazioni → App → Impostazioni avanzate app → Alias di esecuzione app*.
