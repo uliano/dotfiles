@@ -181,7 +181,7 @@ For detailed installation logs and troubleshooting, see `install.md`.
 
 **Experimenting with uv on Windows (June 2026):**
 - On the Windows workstation, trialing [uv](https://docs.astral.sh/uv/) as a single-tool replacement for PyEnv (uv also subsumes venv / pip / pipx).
-- Default "global" environment is a uv venv pinned to Python 3.14 whose `Scripts` dir is prepended to `PATH`, so bare `python` / `pip` / `jupyter` resolve to it — the PyEnv-global feel, **without** activating a venv (keeps the Starship prompt clean).
+- Default "global" environment is a uv venv pinned to Python 3.14 whose `Scripts` dir is prepended to `PATH`, so bare `python` / `pip` / `jupyter` resolve to it — the PyEnv-global feel, **without** activating a venv (keeps the Starship prompt clean). Note: `pip` is seeded into that venv on purpose, because `uv pip` does **not** discover the env from `PATH` (it would target uv's managed Python) — so installs into the default use bare `pip install`, not `uv pip`. See `windows-setup.md` for the full rationale and the dead-ends to avoid.
 - Per-project: `uv venv` (+ `.python-version`); other interpreters via `uv python install <ver>`.
 - Tools that lag on the newest Python (e.g. marker-pdf, pinned to an old Pillow with no 3.14 Windows wheel) are isolated with `uv tool install --python 3.12 <tool>`.
 - **PyEnv remains the Python setup on macOS/Linux and on the other Windows machine** (documented above) — uv is an experiment, not a full switch yet.

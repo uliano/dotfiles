@@ -1,6 +1,11 @@
-# Pacchetti Python installati nell'ambiente pyenv py314 (Python 3.14.3)
-# Data installazione: 2026-04-07
+# Pacchetti Python installati nell'ambiente "acchiappatutto" py314
+# (ora gestito da uv: ~/.venvs/py314, Python 3.14.x — non piu' pyenv)
+# Data installazione iniziale: 2026-04-07
 # Solo pacchetti PRINCIPALI installati manualmente (non dipendenze)
+#
+# PREREQUISITO sull'altra macchina: seminare pip nel venv UNA TANTUM, poi
+# i pacchetti qui sotto si installano con `pip install ...` (vedi windows-setup.md):
+#   uv pip install --python ~/.venvs/py314 pip
 
 ## FASE 1: Giganti (pacchetti con molte dipendenze)
 mdanalysis==2.10.0

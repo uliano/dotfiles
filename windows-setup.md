@@ -248,12 +248,30 @@ uv python pin --global 3.14                # versione di default a livello utent
 
 ### Ambiente "globale" di default (effetto pyenv-global)
 - venv dedicato, **non** attivato: `uv venv --python 3.14 ~/.venvs/py314`
-- nel profilo PowerShell `~/.venvs/py314/Scripts` è prepeso **in fondo** alla sezione PATH → `python`/`pip`/`jupyter`/… risolvono lì (con i pacchetti) scavalcando lo stub del Microsoft Store
+- nel profilo PowerShell `~/.venvs/py314/Scripts` è prepeso **in fondo** alla sezione PATH (così vince su tutto) → `python`/`pip`/`jupyter`/… risolvono lì scavalcando lo stub del Microsoft Store
 - è **solo-PATH** (niente `VIRTUAL_ENV`) → starship non mostra il nome ambiente fuori dai progetti python
-- pacchetti: `uv pip install --python ~/.venvs/py314 <pkg…>` (le voci di `python_packages_installed.txt`; numpy 2.4.6, torch CPU, rdkit, …)
+
+#### ⚠️ Installare nel default: usare `pip`, NON `uv pip` (lezione appresa)
+**`uv pip` NON scopre l'ambiente dal PATH.** Anche se `python` risolve a py314 via PATH, `uv pip install <pkg>` *senza flag* installa nel Python **gestito da uv** (`AppData\Roaming\uv\python\…`), NON in py314 — uv non seleziona mai da solo un venv che sta solo sul PATH e non è attivato. Per centrare py314 con uv serve **sempre** `--python ~/.venvs/py314`.
+
+Soluzione adottata per avere il default "alla pyenv-global" senza flag e con prompt pulito: **installare `pip` dentro py314 una volta sola**, poi usare `pip` nudo (risolto dal PATH → `pip` installa sempre nel proprio env, cioè py314):
+```bash
+uv pip install --python ~/.venvs/py314 pip   # UNA TANTUM, subito dopo aver creato il venv
+pip install <pkg…>                            # poi: installa in py314, senza flag
+```
+Dove finisce il pacchetto è leggibile dal prompt starship:
+- `🐍v3.14.6` (senza parentesi) → default **py314**
+- `🐍v3.14.6 (.venv)` → venv di progetto **attivato**
+
+I pacchetti del default sono in `python_packages_installed.txt` (numpy, torch CPU, rdkit, markitdown, …); installali con `pip install …` (oppure `uv pip install --python ~/.venvs/py314 …`).
+
+#### False piste scartate (NON rifarle sull'altra macchina)
+- **`UV_PYTHON=~/.venvs/py314` nel profilo** → ha priorità su tutto: `uv pip` punta a py314 **anche dentro un progetto col venv ATTIVATO** → rompe il lavoro per-progetto. ❌
+- **`VIRTUAL_ENV=~/.venvs/py314` nel profilo** → uv lo rispetta, ma starship mostra `🐍 (py314)` in **ogni** cartella (il modulo python si attiva sul venv attivo) → prompt sporco. ❌
+- **`python-preference=system` (`UV_PYTHON_PREFERENCE=system`)** → uv continua a preferire il suo Python gestito, non py314. ❌
 
 ### Per-progetto
-`uv venv` (+ `uv python pin <ver>` per una versione diversa) → da attivato ha la precedenza sul default.
+`uv venv` (+ `uv python pin <ver>` per una versione diversa) → **da attivato** ha la precedenza sul default (lo vedi: compare `(.venv)` nel prompt).
 
 ### Tool che non supportano l'ultimo Python (es. marker-pdf)
 marker-pdf vincola pillow 10.4.0, **senza wheel per Python 3.14 su Windows** → isolato in un suo ambiente:
