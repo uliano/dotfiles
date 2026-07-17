@@ -1,7 +1,19 @@
 # Uliano's Dotfiles
 
-Cross-platform development environment setup with Bash, Starship, and PyEnv for Python.
-Supports both **macOS** and **Linux**.
+Cross-platform development environment setup with Bash, Starship, and Python.
+Supports **macOS**, **Linux** and **Windows** (PowerShell — vedi `windows-setup.md`).
+
+**Python:** migrazione **pyenv → uv** in corso (Python 3.14). Stato per macchina:
+
+| Macchina | Python | Note |
+|---|---|---|
+| Windows (workstation) | **uv** + 3.14 | prima migrata, giugno 2026 — `windows-setup.md` |
+| Linux (TUXEDO) | **uv** + 3.14.6 | migrata 17 luglio 2026 |
+| Windows (altra) | pyenv-win | da migrare |
+| macOS | pyenv | da migrare |
+
+Il `bashrc` supporta entrambi: il blocco pyenv e quello uv sono guardati, quindi
+lo stesso file funziona sulle macchine migrate e su quelle ancora a pyenv.
 
 ## Quick Setup
 
@@ -34,22 +46,56 @@ brew install starship eza bat fd fzf
 **Linux:**
 ```bash
 # Create symlinks to dotfiles
-ln -sf "$(pwd)/.bashrc" ~/.bashrc
-ln -sf "$(pwd)/.bash_profile" ~/.bash_profile
+# NB: nel repo i file si chiamano 'bashrc' e 'bash_profile', SENZA punto iniziale.
+ln -sf "$(pwd)/bashrc" ~/.bashrc
+ln -sf "$(pwd)/bash_profile" ~/.bash_profile
 mkdir -p ~/.config
 ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
 ln -sf "$(pwd)/.aliases" ~/.aliases
+ln -sf "$(pwd)/ssh_config" ~/.ssh/config
 
 # Install Starship prompt
-wget -qO- https://starship.rs/install.sh | sh -s -- --yes
+# NB: lo script ufficiale fa sudo per scrivere in /usr/local/bin, ma in pipe da
+# curl non ha un tty per la password e aborta. Installarlo in ~/.local/bin
+# (gia' nel PATH via bashrc) evita del tutto il problema:
+curl -sS https://starship.rs/install.sh | sh -s -- --yes --bin-dir ~/.local/bin
 
 # Install modern CLI tools
-sudo apt install eza bat fd-find fzf -y
+sudo apt install eza bat fd-find fzf ripgrep -y
 ```
 
-### 2. Python Environment with PyEnv
+### 2. Python Environment
 
-> **Note — Windows (June 2026):** on the Windows machine **uv** is being trialed as a PyEnv replacement (see [Migration Notes](#migration-notes) and `windows-setup.md`). PyEnv (below) is still the setup on macOS/Linux and on the other Windows machine.
+> **Aggiornamento luglio 2026:** su **Windows (workstation)** e **Linux** Python e' gestito
+> da **uv** con Python 3.14 — vedi [Python con uv](#python-con-uv) qui sotto.
+> La sezione **PyEnv** che segue resta valida per **macOS** e per l'**altra macchina Windows**,
+> ancora da migrare.
+
+#### Python con uv
+
+```bash
+# Installazione (Linux/macOS)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+uv python install 3.14 --default      # CPython 3.14 + python/python3 in ~/.local/bin
+uv python pin --global 3.14           # versione di default a livello utente
+
+# Ambiente "globale" di default (effetto pyenv-global, senza attivare nulla)
+uv venv --python 3.14 ~/.venvs/py314
+uv pip install --python ~/.venvs/py314 pip   # UNA TANTUM: semina pip nel venv
+```
+
+Il `bashrc` prepone `~/.venvs/py314/bin` al PATH (guardato da `[[ -d ... ]]`), quindi
+`python`/`pip`/`jupyter` nudi risolvono li' **senza** settare `VIRTUAL_ENV` → il prompt
+starship resta pulito fuori dai progetti Python.
+
+⚠️ **Nel default si installa con `pip install`, NON con `uv pip`**: `uv pip` non scopre un
+venv che sta solo sul PATH e installerebbe nel Python gestito da uv. Il razionale completo
+e le false piste sono in `windows-setup.md` (valgono identiche su Linux).
+
+Per-progetto: `uv venv` (+ `uv python pin <ver>`). Vedi la tabella pyenv→uv in `windows-setup.md`.
+
+#### PyEnv (macOS e altra macchina Windows)
 
 **macOS:**
 ```bash
@@ -110,18 +156,23 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 - **Cross-platform**: Automatic OS detection (macOS/Linux) with platform-specific configurations
 - **Bash**: Modern bash configuration with history, completion, and modern tools
 - **Starship**: Fast, customizable prompt with Git integration and Python version display
-- **PyEnv**: Flexible Python version management (replaces Conda/Mamba)
-- **Modern CLI tools**: eza (ls replacement), bat (cat replacement), fd (find replacement)
+- **uv / PyEnv**: gestione Python — uv sulle macchine migrate, pyenv sulle altre (blocchi guardati, stesso `bashrc`)
+- **Modern CLI tools**: eza (ls replacement), bat (cat replacement), fd (find replacement), ripgrep
 - **FZF**: Fuzzy finder integration
 - **Custom aliases**: Tool-specific aliases loaded from `.aliases`
 
 ## Files
 
-- `.bashrc`: Main bash configuration with PyEnv, NVM, Cargo integration
-- `.bash_profile`: Login shell configuration (sources .bashrc)
-- `.aliases`: Custom tool aliases (OpenOCD variants, etc.)
-- `starship.toml`: Starship prompt configuration
-- `gpu_test.py`: PyTorch CUDA functionality test (if using GPU)
+Nomi reali nel repo (senza punto iniziale — si symlinkano a `~/.bashrc` ecc.):
+
+- `bashrc`: Main bash configuration — pyenv, **uv**, NVM, Cargo, aliases
+- `bash_profile`: Login shell configuration (sources .bashrc)
+- `.aliases`: Custom tool aliases (attualmente solo `openocd_stm`)
+- `starship.toml`: Starship prompt configuration (cross-platform)
+- `ssh_config`: SSH config (cross-platform) → `~/.ssh/config`
+- `Microsoft.PowerShell_profile.ps1`: profilo PowerShell (Windows)
+- `python_packages_installed.txt`: pacchetti dell'ambiente di default py314
+- `install.md` / `windows-setup.md`: log di installazione Linux/macOS e Windows
 
 ## Python Version Display
 
@@ -184,7 +235,24 @@ For detailed installation logs and troubleshooting, see `install.md`.
 - Default "global" environment is a uv venv pinned to Python 3.14 whose `Scripts` dir is prepended to `PATH`, so bare `python` / `pip` / `jupyter` resolve to it — the PyEnv-global feel, **without** activating a venv (keeps the Starship prompt clean). Note: `pip` is seeded into that venv on purpose, because `uv pip` does **not** discover the env from `PATH` (it would target uv's managed Python) — so installs into the default use bare `pip install`, not `uv pip`. See `windows-setup.md` for the full rationale and the dead-ends to avoid.
 - Per-project: `uv venv` (+ `.python-version`); other interpreters via `uv python install <ver>`.
 - Tools that lag on the newest Python (e.g. marker-pdf, pinned to an old Pillow with no 3.14 Windows wheel) are isolated with `uv tool install --python 3.12 <tool>`.
-- **PyEnv remains the Python setup on macOS/Linux and on the other Windows machine** (documented above) — uv is an experiment, not a full switch yet.
+
+**uv esteso a Linux (17 luglio 2026):**
+- Esperimento promosso: la macchina **Linux (TUXEDO OS)** e' stata configurata da zero con uv + **Python 3.14.6**, stesso design di Windows (venv `~/.venvs/py314` non attivato, solo-PATH, `pip` seminato dentro).
+- Su Linux la dir del venv e' `bin/` (non `Scripts/`); il resto e' identico, incluse le false piste da evitare (`UV_PYTHON`, `VIRTUAL_ENV` nel profilo).
+- Il blocco uv nel `bashrc` e' guardato da `[[ -d ~/.venvs/py314/bin ]]` → **no-op** sulle macchine ancora a pyenv, che restano intatte.
+- **Da migrare:** macOS e l'altra macchina Windows.
+
+**Politica sulle versioni (luglio 2026):**
+- Si punta alle **versioni piu' recenti compatibili**, non alla riproduzione dei pin esistenti: le macchine si allineano a seguire, dove si riesce.
+- Corollario pratico: prima di aggirare un vincolo (compilare dai sorgenti, declassare una dipendenza), **verificare se l'upstream l'ha gia' rimosso in una release recente**. E' successo con `opencv-python` e `nglview` — vedi `python_packages_installed.txt`.
+
+**Pacchetti GPU/NVIDIA: nessuna regola per piattaforma, si verifica macchina per macchina.**
+Il parco e' misto (Linux/Windows/macOS, alcune con NVIDIA e alcune no) e i default di PyPI
+cambiano col sistema operativo: su Linux `torch` di default e' la build **CUDA**, su Windows
+e' **CPU**. Sbagliare costa in entrambi i versi — gigabyte di peso morto dove NVIDIA non c'e',
+GPU sprecata dove c'e'. Procedura (`nvidia-smi` prima, scelta poi) e trappole note
+(`torch`, `xgboost`) in **`python_packages_installed.txt`**, sezione
+*"PACCHETTI NVIDIA: VERIFICARE MACCHINA PER MACCHINA"*.
 
 **Why this setup?**
 - **ZSH → Bash**: Simpler, more portable, better compatibility across systems

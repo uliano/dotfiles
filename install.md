@@ -1,13 +1,13 @@
 # Installation Log & Reference
 
-Complete installation guide for the development environment based on Bash, PyEnv, and modern CLI tools.
+Complete installation guide for the development environment based on Bash, uv, and modern CLI tools.
 
 ## System Overview
 
-**Operating System:** Ubuntu/Debian-based Linux
+**Operating System:** Ubuntu/Debian-based Linux (testato su TUXEDO OS, glibc 2.39)
 **Shell:** Bash with Starship prompt
-**Python Management:** PyEnv
-**Additional Tools:** NVM (Node.js), Cargo (Rust), FZF, eza, bat, fd
+**Python Management:** **uv** + Python 3.14 (dal 17 luglio 2026; prima pyenv — vedi sezione 2)
+**Additional Tools:** NVM (Node.js), Cargo (Rust), FZF, eza, bat, fd, ripgrep
 
 ---
 
@@ -21,14 +21,23 @@ Bash is the default shell on most Linux systems. Configuration files:
 - `~/.bash_profile` - Login shell configuration (sources .bashrc)
 - `~/.aliases` - Custom tool aliases
 
-Copy dotfiles:
+Symlink dotfiles (meglio di `cp`: le modifiche restano tracciate dal repo).
+**NB:** nel repo i file si chiamano `bashrc`/`bash_profile`, **senza punto iniziale**.
+
 ```bash
 cd ~/dotfiles
-cp .bashrc ~/.bashrc
-cp .bash_profile ~/.bash_profile
-cp .aliases ~/.aliases
+ln -sf "$(pwd)/bashrc" ~/.bashrc
+ln -sf "$(pwd)/bash_profile" ~/.bash_profile
+ln -sf "$(pwd)/.aliases" ~/.aliases
+mkdir -p ~/.config && ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
+ln -sf "$(pwd)/ssh_config" ~/.ssh/config
 source ~/.bashrc
 ```
+
+⚠️ **Conseguenza del symlink:** `~/.bashrc` punta *dentro il repo*. Gli installer che
+appendono righe a `~/.bashrc` (nvm, rustup, fzf, conda…) scrivono nei dotfiles condivisi
+e la modifica finisce su **tutte** le macchine. Dopo averne lanciato uno, controllare
+sempre `git -C ~/dotfiles diff`. (rustup: usare `--no-modify-path`.)
 
 ### Bash Features Enabled
 
@@ -39,7 +48,38 @@ source ~/.bashrc
 
 ---
 
-## 2. PyEnv Installation
+## 2. Python: uv (attuale) / PyEnv (storico)
+
+> **Dal 17 luglio 2026 questa macchina usa uv.** La sezione PyEnv sotto resta come
+> riferimento per macOS e per l'altra macchina Windows, non ancora migrate.
+
+### 2a. uv — setup usato adesso
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh     # uv finisce in ~/.local/bin
+
+uv python install 3.14 --default                    # CPython 3.14 + python/python3 nudi
+uv python pin --global 3.14                         # default a livello utente
+
+# Ambiente "globale" di default (effetto pyenv-global, senza attivare nulla)
+uv venv --python 3.14 ~/.venvs/py314
+uv pip install --python ~/.venvs/py314 pip          # UNA TANTUM: semina pip nel venv
+```
+
+Il `bashrc` prepone `~/.venvs/py314/bin` al PATH (guardato), **senza** settare `VIRTUAL_ENV`:
+`python`/`pip` nudi risolvono nel default e starship resta pulito fuori dai progetti.
+
+⚠️ Nel default installare con **`pip install`**, non `uv pip` (non scopre un venv che sta
+solo sul PATH). Razionale completo e false piste: `windows-setup.md`.
+
+Verifica:
+```bash
+python --version        # Python 3.14.6
+command -v python       # ~/.venvs/py314/bin/python
+echo "[$VIRTUAL_ENV]"   # vuoto = corretto
+```
+
+### 2b. PyEnv — riferimento storico (macOS / altra macchina Windows)
 
 ### Install Dependencies
 
@@ -149,7 +189,7 @@ username@hostname:directory git_info python_version duration
 
 ```bash
 sudo apt update
-sudo apt install -y eza bat fd-find fzf
+sudo apt install -y eza bat fd-find fzf ripgrep
 ```
 
 ### Tool Replacements
@@ -158,6 +198,16 @@ sudo apt install -y eza bat fd-find fzf
 - **bat** → `cat` (with syntax highlighting)
 - **fd** → `find` (faster, simpler syntax)
 - **fzf** → Fuzzy finder (Ctrl+R for history, Ctrl+T for files)
+- **ripgrep** → `rg` (grep veloce)
+
+### Nomi dei binari su Debian/Ubuntu
+
+Due pacchetti hanno il binario rinominato per conflitto con pacchetti preesistenti:
+
+| pacchetto apt | binario reale |
+|---|---|
+| `fd-find` | **`fdfind`** |
+| `bat` | **`batcat`** |
 
 ### Aliases (auto-configured in .bashrc)
 
@@ -166,9 +216,21 @@ alias ls='eza'
 alias ll='eza -la'
 alias lr='eza -lo --sort=modified'
 alias lrg='eza -lag --sort=modified'
-alias find='fd'
-alias fd='fdfind'  # Ubuntu package name
+alias fd='fdfind'      # nome del binario su Ubuntu
+alias find='fdfind'    # NB: punta al binario, non all'alias 'fd' (vedi sotto)
+alias bat='batcat'
+alias cat='batcat -p'  # plain, senza decorazioni — come il profilo PowerShell
 ```
+
+> **Bug corretto il 17/07/2026 — `find` non era mai aliasato su Ubuntu.** Il `bashrc` aveva:
+> ```bash
+> command -v fd >/dev/null && alias find='fd'       # 'fd' non esiste su Ubuntu -> mai eseguito
+> command -v fdfind >/dev/null && alias fd='fdfind'
+> ```
+> Su Debian/Ubuntu il binario e' `fdfind`, quindi `command -v fd` fallisce **sempre** e
+> l'alias `find` non veniva creato: `find` restava quello di sistema, in silenzio.
+> Non basta invertire le due righe (`fd` diventa un *alias*, e `command -v` cerca un
+> *comando*): l'alias `find` ora punta direttamente a `fdfind`.
 
 ---
 
@@ -320,16 +382,19 @@ After setup, verify your environment:
 # Shell
 echo $SHELL  # /bin/bash
 
-# Python
-python --version  # Python 3.13.7
-which python      # ~/.pyenv/shims/python
+# Python (uv)
+python --version     # Python 3.14.6
+command -v python    # ~/.venvs/py314/bin/python
+echo "[$VIRTUAL_ENV]" # vuoto = corretto (default solo-PATH)
+uv --version
 pip list
 
-# Tools
+# Tools (NB: su Ubuntu i binari sono batcat e fdfind)
 eza --version
-bat --version
-fd --version
+batcat --version
+fdfind --version
 fzf --version
+rg --version
 
 # Optional
 node --version  # if NVM installed
@@ -370,7 +435,16 @@ source ~/.bashrc
 ## Quick Reference Commands
 
 ```bash
-# PyEnv
+# uv (setup attuale)
+uv python list                    # versioni disponibili/installate
+uv python install 3.12            # installa un interprete
+uv python pin --global 3.14       # default utente
+uv python pin 3.11                # versione per il progetto corrente (.python-version)
+uv venv                           # venv di progetto (poi: source .venv/bin/activate)
+uv tool install --python 3.12 X   # tool isolato su un Python diverso
+pip install X                     # installa NELL'ambiente di default py314 (non 'uv pip')
+
+# PyEnv (macchine non ancora migrate)
 pyenv versions              # List installed versions
 pyenv global 3.13.7         # Set global version
 pyenv virtualenv NAME       # Create virtualenv

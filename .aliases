@@ -2,7 +2,10 @@
 # CUSTOM TOOL ALIASES
 # ====================================================================
 # This file contains aliases for custom-compiled tools and utilities
-# Source this file from .zshrc to make aliases available
+# Sourced from bashrc (la shell e' bash dall'ottobre 2025, non piu' zsh)
+#
+# NB: gli alias dei tool moderni (ls/eza, cat/bat, find/fd, ...) NON stanno qui:
+# sono nel bashrc, perche' condizionati alla presenza del binario.
 
 # ====================================================================
 # OpenOCD STMicroelectronics Custom Build

@@ -129,8 +129,24 @@ if command -v eza >/dev/null; then
     alias lr='eza -lo --sort=modified'        # without group
     alias lrg='eza -lag --sort=modified'      # with group (-g flag)
 fi
-command -v fd >/dev/null && alias find='fd'
-command -v fdfind >/dev/null && alias fd='fdfind'  # Ubuntu package name
+# fd: su Debian/Ubuntu il binario si chiama fdfind (conflitto col pkg 'fd').
+# NB: aliasare 'find' a 'fd' e basta non funziona qui — 'fd' e' un alias, non un
+# comando, quindi 'command -v fd' fallisce; si punta direttamente al binario.
+if command -v fdfind >/dev/null; then
+    alias fd='fdfind'
+    alias find='fdfind'
+elif command -v fd >/dev/null; then
+    alias find='fd'
+fi
+
+# bat: su Debian/Ubuntu il binario si chiama batcat (conflitto di nome col pkg 'bat')
+command -v batcat >/dev/null && alias bat='batcat'
+# cat -> bat -p (plain, senza decorazioni: comodo da copiare) come nel profilo PowerShell
+if command -v batcat >/dev/null; then
+    alias cat='batcat -p'
+elif command -v bat >/dev/null; then
+    alias cat='bat -p'
+fi
 
 # ====================================================================
 # PATH CONFIGURATION
@@ -235,6 +251,8 @@ fi
 # ====================================================================
 # PYENV CONFIGURATION
 # ====================================================================
+# Macchine ancora su pyenv (vedi README "Migration Notes"). Sulle macchine
+# passate a uv, pyenv non c'e' e questo blocco e' un no-op.
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 if command -v pyenv >/dev/null; then
@@ -242,6 +260,15 @@ if command -v pyenv >/dev/null; then
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
 fi
+
+# ====================================================================
+# UV: AMBIENTE "GLOBALE" DI DEFAULT (effetto pyenv-global)
+# ====================================================================
+# venv NON attivato, solo-PATH: bare python/pip/jupyter risolvono qui, ma
+# senza VIRTUAL_ENV -> starship resta pulito fuori dai progetti python.
+# Prepeso DOPO pyenv cosi' vince; guardato, quindi no-op sulle macchine a pyenv.
+# NB: installare nel default con `pip install`, NON `uv pip` (vedi windows-setup.md).
+[[ -d "$HOME/.venvs/py314/bin" ]] && export PATH="$HOME/.venvs/py314/bin:$PATH"
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -274,7 +301,7 @@ fi
 [[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
 
 # Cargo environment
-. "$HOME/.cargo/env"
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

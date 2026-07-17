@@ -1,158 +1,227 @@
-# Pacchetti Python installati nell'ambiente "acchiappatutto" py314
-# (ora gestito da uv: ~/.venvs/py314, Python 3.14.x — non piu' pyenv)
-# Data installazione iniziale: 2026-04-07
-# Solo pacchetti PRINCIPALI installati manualmente (non dipendenze)
+# Pacchetti Python dell'ambiente "acchiappatutto" py314
+# (gestito da uv: ~/.venvs/py314 — non piu' pyenv)
 #
-# PREREQUISITO sull'altra macchina: seminare pip nel venv UNA TANTUM, poi
-# i pacchetti qui sotto si installano con `pip install ...` (vedi windows-setup.md):
+# Installazione iniziale (Windows):  2026-04-07  — Python 3.14.x
+# Reinstallato da zero su LINUX:     2026-07-17  — Python 3.14.6, TUXEDO OS, glibc 2.39
+#
+# Solo pacchetti PRINCIPALI installati manualmente (non dipendenze).
+#
+# PREREQUISITO: seminare pip nel venv UNA TANTUM, poi si installa con `pip install ...`
+# (NON `uv pip` — vedi windows-setup.md):
 #   uv pip install --python ~/.venvs/py314 pip
+#
+# POLITICA VERSIONI: si installano le PIU' RECENTI COMPATIBILI, senza pin.
+# I numeri qui sotto sono un'istantanea di cosa e' stato risolto su Linux il 2026-07-17,
+# non dei vincoli: reinstallando, lasciare che il resolver prenda l'ultima.
+#   pip install -U mdanalysis rdkit scikit-learn jupyterlab statsmodels \
+#     scikit-image xgboost lightgbm seaborn plotnine nglview pdfplumber reportlab \
+#     pingouin pyarrow opencv-python polars openpyxl xlrd odfpy pypdf pyside6 pytest
 
 ## FASE 1: Giganti (pacchetti con molte dipendenze)
 mdanalysis==2.10.0
-rdkit==2025.9.1
-scikit-learn==1.7.2
-jupyterlab==4.4.9
-statsmodels==0.14.5
+rdkit==2026.3.4
+scikit-learn==1.9.0
+jupyterlab==4.6.1
+statsmodels==0.14.6
 
 ## FASE 2: Pacchetti Medi
-opencv-python==4.12.0.88
-scikit-image==0.25.2
-xgboost==3.1.0
+opencv-python==5.0.0.93
+scikit-image==0.26.0
+xgboost-cpu==3.3.0     # variante CPU-only, scelta perche' QUESTA macchina non ha NVIDIA.
+                       # Su una macchina con NVIDIA usare 'xgboost' normale.
+                       # In entrambi i casi il modulo importato e' 'xgboost'.
 lightgbm==4.6.0
 seaborn==0.13.2
-plotnine==0.15.0
-nglview==4.0
-pdfplumber==0.11.7
-reportlab==4.4.4
-pingouin==0.5.5
-pyarrow==21.0.0
+plotnine==0.15.7
+nglview==4.0.1
+pdfplumber==0.11.10
+reportlab==5.0.0
+pingouin==0.6.1
+pyarrow==25.0.0
 
 ## FASE 3: Pacchetti Leggeri
-polars==1.34.0
+polars==1.42.1
 openpyxl==3.1.5
 xlrd==2.0.2
 odfpy==1.4.1
-pypdf==6.1.2
-pyside6==6.10.0
-pytest==8.4.2
+pypdf==6.14.2
+pyside6==6.11.1
+pytest==9.1.1
 
-## Pacchetti già presenti (installati come dipendenze di altri)
-# tqdm==4.67.1 (da mdanalysis)
-# pyyaml==6.0.3 (da jupyterlab)
+## Dipendenze chiave che ne derivano
+# numpy==2.5.1     <- vedi sezione NumPy sotto
+# pandas==3.0.3
+# Pillow==12.3.0
 
-## PDF → Markdown per LLM
-pymupdf4llm   # leggero e veloce, ottimizzato per LLM (CPU)
+## PDF -> Markdown per LLM
+pymupdf4llm   # leggero e veloce, ottimizzato per LLM (CPU) — la scelta di default
 markitdown    # Microsoft, supporta PDF/DOCX/XLSX e altri formati
-docling       # IBM, OCR + tabelle + figure, molto completo (CPU) → GUI: docling serve
-marker-pdf    # qualità massima, usa modelli ML (CPU, torch+cpu) → GUI: marker_gui (Gradio)
-gradio        # necessario per marker_gui
+docling       # IBM, OCR + tabelle + figure, molto completo (CPU) -> GUI: docling serve
+torch         # dipendenza di docling — build CPU o CUDA? dipende dalla macchina:
+              # vedi "PACCHETTI NVIDIA: VERIFICARE MACCHINA PER MACCHINA" sotto
 
-## TOTALE: 28 pacchetti installati manualmente
+# RIMOSSI su Linux il 2026-07-17:
+#   marker-pdf  -> richiedeva un ambiente 3.12 separato (Pillow<11) per un uso mai
+#                  concretizzatosi. Se dovesse servire: uv tool install --python 3.12
+#                  --torch-backend=cpu marker-pdf   (NB: --torch-backend, vedi sotto)
+#   gradio      -> serviva solo per marker_gui, quindi decaduto con marker-pdf
 
-## NOTA IMPORTANTE: NumPy 2.3.4 su Windows
+## TOTALE: 26 pacchetti nel default
 
-Durante l'installazione, opencv-python e nglview hanno richiesto il downgrade di
-numpy da 2.3.4 a 2.2.6 per via del vincolo numpy<2.3.0.
 
-### Investigazione del vincolo:
+## =====================================================================
+## NUMPY: la situazione si e' risolta da sola (aggiornato 2026-07-17)
+## =====================================================================
+##
+## VERSIONE ATTUALE: numpy 2.5.1, senza forzature.
+##
+## STORIA (Windows, aprile 2026): opencv-python 4.12.0.88 e nglview 4.0 dichiaravano
+## `numpy<2.3.0` / `numpy<2.3` e trascinavano numpy in downgrade a 2.2.6. Il vincolo
+## venne forzato a mano con `pip install --upgrade "numpy>=2.3.0"` (-> 2.3.4), e su
+## Linux si era ipotizzata la compilazione di opencv dai sorgenti per evitare un ABI
+## mismatch manylinux (vedi sezione OBSOLETA in fondo).
+##
+## OGGI IL PROBLEMA NON ESISTE PIU': gli upstream hanno rimosso i vincoli.
+##
+##   opencv-python 4.12.0.88 -> `numpy<2.3.0,>=2` | wheel solo manylinux2014
+##   opencv-python 5.0.0.93  -> `numpy>=2`        | wheel manylinux2014 E manylinux_2_28
+##
+##   nglview 4.0             -> `numpy<2.3`
+##   nglview 4.0.1           -> `numpy` (nessun cap)
+##
+## Bastano le versioni recenti: numpy resta 2.5.1, nessuna forzatura, nessuna
+## compilazione. Verificato su Linux il 2026-07-17.
+##
+## ATTENZIONE — opencv 5.0 e' un MAJOR BUMP con breaking change nell'API cv2 rispetto
+## alla 4.x. Su Linux e' installato il 5.0.0.93; la macchina Windows ha ancora
+## 4.12.0.88 + numpy 2.3.4. DA ALLINEARE.
+##
+## Test ABI eseguito su Linux (PASSA):
+##   python -c "
+##   import cv2, numpy as np
+##   print(cv2.__version__, np.__version__)          # 5.0.0  2.5.1
+##   img = np.zeros((100,100,3), dtype=np.uint8)
+##   cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+##   cv2.GaussianBlur(np.random.randint(0,255,(256,256),dtype=np.uint8), (5,5), 0)
+##   print('OK')"
 
-**opencv-python (github.com/opencv/opencv-python/issues/1122):**
-- Vincolo motivato per LINUX: manylinux2014 vs manylinux_x_y (ABI mismatch)
-- Su WINDOWS: vincolo NON motivato tecnicamente (manylinux è solo Linux)
-- PR #1121 propone fix ma NON è stata merged
-- Maintainer riconoscono il problema ma non hanno rilasciato fix
 
-**nglview:**
-- Vincolo numpy<2.3 presente nei wheel metadata
-- Codice sorgente NON ha questo vincolo (pyproject.toml pulito)
-- Nessuna issue GitHub o discussione tecnica trovata
-- Probabilmente copia conservativa da opencv
+## =====================================================================
+## WHEEL PER PYTHON 3.14: controllare prima di installare
+## =====================================================================
+##
+## Python 3.14 e' recente: i pacchetti con estensioni C senza wheel cp314 vengono
+## compilati dall'sdist (lentissimo). Con le versioni di aprile 2026 succedeva a:
+##
+##   scikit-image 0.25.2  -> nessun wheel cp314, compila | 0.26.0 ha il wheel  ✅
+##   pyarrow      21.0.0  -> nessun wheel cp314, compila | 25.0.0 ha il wheel  ✅
+##
+## Falsi allarmi (sembrano privi di wheel ma vanno benissimo): xgboost e lightgbm
+## pubblicano `py3-none-manylinux_2_28`, valido su qualsiasi Python 3.
+## Anche opencv usa `cp37-abi3` (stable ABI) -> vale per 3.14.
+##
+## Verifica rapida per un pacchetto:
+##   python3 -c "
+##   import json,urllib.request
+##   d=json.load(urllib.request.urlopen('https://pypi.org/pypi/PKG/VER/json'))
+##   [print(f['filename']) for f in d['urls'] if f['filename'].endswith('.whl')]"
 
-### Decisione: UPGRADE a numpy 2.3.4 su Windows
 
-Eseguito: pip install --upgrade "numpy>=2.3.0"
+## =====================================================================
+## PACCHETTI NVIDIA: VERIFICARE MACCHINA PER MACCHINA
+## =====================================================================
+##
+## ⚠️ NON ESISTE una regola "su Linux si fa cosi'". Il parco macchine e' misto —
+## Linux, Windows, macOS, ALCUNE CON NVIDIA E ALCUNE NO — e sbagliare costa in
+## entrambe le direzioni:
+##   - installare le build CUDA dove non c'e' NVIDIA  -> GIGABYTE di peso morto
+##   - installare le build CPU dove la NVIDIA C'E'    -> GPU sprecata, tutto lento
+##
+## Quindi: PRIMA si guarda l'hardware, POI si sceglie. Ogni volta, su ogni macchina.
+##
+## --- PASSO 1: c'e' una GPU NVIDIA su QUESTA macchina? ---
+##
+##   nvidia-smi                       # se risponde: NVIDIA presente e driver attivo
+##   lspci | grep -i nvidia           # Linux, anche senza driver
+##   # macOS: mai. Niente CUDA su Mac da anni -> per torch si usa MPS (Apple Silicon).
+##
+## --- PASSO 2a: SE C'E' NVIDIA -> build CUDA (i default vanno bene) ---
+##
+##   pip install torch                # su Linux il default PyPI E' GIA' la build CUDA
+##   pip install xgboost              # nccl serve davvero -> lasciarlo
+##   # Su Windows il default e' CPU: per la GPU serve l'index CUDA esplicito, es.
+##   #   pip install torch --index-url https://download.pytorch.org/whl/cu126
+##   # Verifica: python -c "import torch; print(torch.cuda.is_available())"  -> True
+##
+## --- PASSO 2b: SE NON C'E' NVIDIA -> build CPU (vanno chieste esplicitamente) ---
+##
+##   pip install torch --index-url https://download.pytorch.org/whl/cpu   # -> 2.13.0+cpu
+##   pip install xgboost-cpu          # NON 'xgboost' (vedi trappola sotto)
+##   # con uv, per i tool isolati:  uv tool install --torch-backend=cpu ...
+##   # Verifica: python -c "import torch; print(torch.__version__)"  -> deve finire in +cpu
+##
+## --- LE DUE TRAPPOLE, quando NON c'e' NVIDIA ---
+##
+## 1) `torch` su Linux: il wheel PyPI di default e' la build CUDA e si trascina
+##    nvidia-cudnn, cuda-toolkit, triton... svariati GB. Su Windows il default e'
+##    CPU, ecco perche' il problema non si era mai visto prima di Linux.
+##    -> installare torch dall'index CPU PRIMA dei pacchetti che lo richiedono
+##       (es. docling): dopo, pip lo trova gia' soddisfatto e non ritenta con CUDA.
+##
+## 2) `xgboost` dichiara su Linux, INCONDIZIONATAMENTE:
+##        nvidia-nccl-cu12; platform_system == 'Linux'
+##    senza controllare se una GPU NVIDIA esista: 400 MB. NCCL serve solo al training
+##    distribuito multi-GPU. Su Windows la dipendenza non c'e'.
+##    -> `xgboost-cpu`: stessa versione, deps numpy+scipy, wheel da 5 MB invece di 400.
+##       Il modulo importato resta `xgboost`, il codice non cambia.
+##         pip uninstall -y xgboost nvidia-nccl-cu12 && pip install xgboost-cpu
+##
+## --- CONTROLLO, da rifare dopo ogni installazione grossa ---
+##
+##   pip list | grep -iE 'nvidia|cuda|triton'
+##   # macchina CON NVIDIA:  legittimo trovarci roba
+##   # macchina SENZA:       deve essere VUOTO
+##
+## Se rispunta qualcosa dove non deve, trovare il colpevole prima di disinstallare a caso:
+##   python -c "
+##   import importlib.metadata as md
+##   for d in md.distributions():
+##       for r in (d.requires or []):
+##           if 'nvidia' in r.lower() or 'cuda' in r.lower():
+##               print(d.metadata['Name'], '->', r)"
+##
+## --- STATO PER MACCHINA (aggiornare quando cambia) ---
+##
+## Linux TUXEDO (portatile): AMD Ryzen AI 7 350 + iGPU Radeon 860M -> NESSUNA NVIDIA.
+##   Configurato 2026-07-17 con torch 2.13.0+cpu e xgboost-cpu; `pip list | grep nvidia`
+##   deve restare vuoto.
+##   Note hardware:
+##   - CPU Zen 5 con AVX-512 completo, VNNI e BF16 -> oneDNN le sfrutta, l'inferenza
+##     CPU e' piu' che dignitosa (non e' il caso disperato che sembra).
+##   - NPU (XDNA) presente, driver amdxdna caricato (/dev/accel0), ma PyTorch NON la usa:
+##     servirebbe ONNX Runtime + VitisAI con modelli quantizzati/convertiti.
+##   - iGPU via ROCm: possibile ma capriccioso sulle iGPU, e la banda di memoria e'
+##     condivisa con la CPU. Non e' la prima mossa da tentare.
+##
+## Windows workstation: DA VERIFICARE con nvidia-smi, e annotare qui l'esito.
+## Altra macchina Windows: DA VERIFICARE.
+## macOS: mai CUDA. Per torch, backend MPS su Apple Silicon.
 
-**Risultato:**
-- numpy==2.3.4 installato con successo
-- opencv-python 4.12.0.88: funziona correttamente (test ok)
-- nglview 4.0: funziona correttamente (test ok)
-- MDAnalysis 2.10.0: funziona correttamente (test ok)
-- Nessun breaking change ABI per Windows in numpy 2.3.0
 
-**Conclusione:**
-I vincoli numpy<2.3 su Windows sono eccessivamente conservativi e non hanno
-motivazione tecnica documentata. Su Linux il problema è reale (ABI mismatch),
-ma su Windows non si applica.
-
-pip mostra warning sui conflitti di dipendenze, ma sono "lamentele" del resolver
-senza impatto funzionale reale.
-
-## VERSIONE FINALE NUMPY: 2.3.4 (upgrade rispetto al vincolo dei wheel)
-
----
-
-## ⚠️ IMPORTANTE: Installazione su LINUX
-
-**Su sistemi Linux, opencv-python DEVE essere compilato dai sorgenti per evitare
-problemi ABI con numpy 2.3.4+**
-
-### Motivo:
-
-Il problema manylinux è REALE su Linux:
-- opencv-python wheel: manylinux2014 (glibc 2.17, del 2014)
-- numpy 2.3.4 wheel: manylinux_2_28 (glibc 2.28, del 2018)
-- ABI mismatch tra le due versioni → rischio crash, memory corruption
-
-Su Windows/macOS questo problema NON esiste (manylinux è solo Linux).
-
-### Soluzione per Linux:
-
-**NON installare opencv-python dal wheel precompilato. Compilare dai sorgenti:**
-
-```bash
-# Rimuovi wheel precompilato se già installato
-pip uninstall opencv-python
-
-# Installa dai SORGENTI (compila localmente)
-pip install --no-binary opencv-python opencv-python
-
-# Oppure per versione headless (senza GUI, più veloce):
-pip install --no-binary opencv-python-headless opencv-python-headless
-```
-
-### Cosa Succede Compilando dai Sorgenti:
-
-1. OpenCV viene compilato SUL TUO sistema (con la TUA versione di glibc)
-2. Si linka a numpy 2.3.4 già installato
-3. Tutto compilato con la stessa toolchain → ABI consistente
-4. Nessun vincolo metadata numpy<2.3.0 (quello è solo nei wheel)
-
-### Requisiti per Compilazione su Linux:
-
-```bash
-# Dipendenze build (Ubuntu/Debian)
-sudo apt install build-essential cmake python3-dev
-
-# Dipendenze build (RHEL/CentOS/Fedora)
-sudo yum install gcc gcc-c++ cmake python3-devel
-
-# Tempo di compilazione: 30min - 2 ore (dipende dal sistema)
-```
-
-### Sistema Minimo per numpy 2.3.4 wheel:
-
-- glibc ≥ 2.28 (Debian 10, Ubuntu 18.04, RHEL 8+)
-- Se hai sistema più vecchio: compila ANCHE numpy dai sorgenti
-
-### Test dopo Installazione:
-
-```bash
-python -c "import cv2; import numpy as np; \
-    print(f'OpenCV: {cv2.__version__}'); \
-    print(f'NumPy: {np.__version__}'); \
-    img = np.zeros((100,100,3), dtype=np.uint8); \
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY); \
-    print('✅ Test OK')"
-```
-
-**NOTA:** Questa procedura sarà testata su Linux per conferma.
+## =====================================================================
+## SEZIONE OBSOLETA — compilare opencv dai sorgenti su Linux
+## =====================================================================
+##
+## ⚠️ NON SERVE PIU'. Tenuta solo come traccia del ragionamento.
+##
+## Si riteneva che su Linux opencv-python andasse compilato dai sorgenti
+## (`pip install --no-binary opencv-python opencv-python`, 30min-2h) per un ABI
+## mismatch reale: opencv spediva solo wheel manylinux2014 (glibc 2.17) mentre numpy
+## era manylinux_2_28 (glibc 2.28).
+##
+## opencv-python 5.0.0.93 pubblica anche il wheel manylinux_2_28: stesso profilo di
+## numpy, mismatch eliminato. Su glibc >= 2.28 pip prende direttamente quel wheel.
+##
+## LEZIONE GENERALE: prima di aggirare un vincolo (compilare dai sorgenti, declassare
+## una dipendenza, forzare un upgrade), controllare se l'upstream l'ha gia' rimosso in
+## una release recente. Qui la procedura di compilazione non e' mai stata necessaria.
