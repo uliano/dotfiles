@@ -140,13 +140,10 @@ elif command -v fd >/dev/null; then
 fi
 
 # bat: su Debian/Ubuntu il binario si chiama batcat (conflitto di nome col pkg 'bat')
+# Aliasiamo solo bat->batcat, così bat è disponibile con un nome sensato.
+# NON aliasiamo cat: 'cat' resta il vero cat. (batcat pipa in less e su file grossi
+# 'G'/vai-a-fine blocca finché bat non ha processato tutto; per navigare usa less/tail.)
 command -v batcat >/dev/null && alias bat='batcat'
-# cat -> bat -p (plain, senza decorazioni: comodo da copiare) come nel profilo PowerShell
-if command -v batcat >/dev/null; then
-    alias cat='batcat -p'
-elif command -v bat >/dev/null; then
-    alias cat='bat -p'
-fi
 
 # ====================================================================
 # PATH CONFIGURATION

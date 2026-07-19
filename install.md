@@ -195,7 +195,7 @@ sudo apt install -y eza bat fd-find fzf ripgrep
 ### Tool Replacements
 
 - **eza** → `ls` (with colors, icons, git integration)
-- **bat** → `cat` (with syntax highlighting)
+- **bat** → `bat` (cat con syntax highlighting; NON sostituisce `cat`)
 - **fd** → `find` (faster, simpler syntax)
 - **fzf** → Fuzzy finder (Ctrl+R for history, Ctrl+T for files)
 - **ripgrep** → `rg` (grep veloce)
@@ -218,8 +218,7 @@ alias lr='eza -lo --sort=modified'
 alias lrg='eza -lag --sort=modified'
 alias fd='fdfind'      # nome del binario su Ubuntu
 alias find='fdfind'    # NB: punta al binario, non all'alias 'fd' (vedi sotto)
-alias bat='batcat'
-alias cat='batcat -p'  # plain, senza decorazioni — come il profilo PowerShell
+alias bat='batcat'     # bat con nome sensato; 'cat' resta il vero cat
 ```
 
 > **Bug corretto il 17/07/2026 — `find` non era mai aliasato su Ubuntu.** Il `bashrc` aveva:
