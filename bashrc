@@ -245,6 +245,12 @@ fi
 # RISC-V WCH GCC toolchain
 [[ -d "/opt/RISC-V-gcc12-wch-v210/bin" ]] && export PATH=/opt/RISC-V-gcc12-wch-v210/bin:$PATH
 
+# Toolchain compilate da sorgente in /sw (build-arm-none-eabi.sh / build-avr.sh).
+# Prepese DOPO le /opt: dove coesistono, la versione /sw (piu' recente) vince.
+# Symlink versionati (/sw/arm-none-eabi -> ...-16.1, /sw/avr -> avr-16.1).
+[[ -d "/sw/arm-none-eabi/bin" ]] && export PATH=/sw/arm-none-eabi/bin:$PATH
+[[ -d "/sw/avr/bin" ]] && export PATH=/sw/avr/bin:$PATH
+
 # ====================================================================
 # PYENV CONFIGURATION
 # ====================================================================
