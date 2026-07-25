@@ -208,10 +208,10 @@ if [[ "$OS_TYPE" == "macos" ]]; then
     alias catdcd='$VMD/Contents/vmd/plugins/MACOSXX86_64/bin/catdcd5.2/catdcd'
 
     # MOE
-    export MOE=/Applications/moe2022/
+    export MOE=/Applications/moe2024.0604
     alias moe='$MOE/bin/moe'
-    alias licenze81='$MOE/lm/bin/lmutil lmstat -c $MOE/license.81 -a'
-    alias licenze128='$MOE/lm/bin/lmutil lmstat -c $MOE/license.128 -a'
+    alias licenze='$MOE/lm/bin/lmutil lmstat -c $MOE/license.dat -a'
+    [[ -d "$MOE/bin" ]] && export PATH="$PATH:$MOE/bin"
 
     # Schrodinger
     export SCHRODINGER=/opt/schrodinger/suites2025-3/
