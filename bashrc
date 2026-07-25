@@ -250,6 +250,7 @@ fi
 # Symlink versionati (/sw/arm-none-eabi -> ...-16.1, /sw/avr -> avr-16.1).
 [[ -d "/sw/arm-none-eabi/bin" ]] && export PATH=/sw/arm-none-eabi/bin:$PATH
 [[ -d "/sw/avr/bin" ]] && export PATH=/sw/avr/bin:$PATH
+[[ -d "/sw/gcc/bin" ]] && export PATH=/sw/gcc/bin:$PATH   # gcc nativo 16.x (shadowa il gcc di sistema)
 
 # ====================================================================
 # PYENV CONFIGURATION
