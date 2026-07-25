@@ -198,6 +198,27 @@ if [[ "$OS_TYPE" == "macos" ]]; then
         eval "$(/usr/local/bin/brew shellenv)"
     fi
 
+    # avr-gcc e' keg-only (formula versionata avr-gcc@N, tap osx-cross/avr):
+    # brew non lo linka in /opt/homebrew/bin. Il glob prende tutte le versioni
+    # installate; prependendo in ordine, l'ultima (la piu' alta) vince.
+    for _keg in /opt/homebrew/opt/avr-gcc@*/bin; do
+        [[ -d "$_keg" ]] && export PATH="$_keg:$PATH"
+    done
+    unset _keg
+
+    # gcc GNU: brew installa solo i nomi versionati (gcc-16, g++-16) per non
+    # coprire gcc/g++ di sistema (= Apple clang). Alias solo interattivi:
+    # in shell gcc e' GNU come su Linux (/sw/gcc), ma make/cmake/pip
+    # continuano a vedere clang e i build macOS non si rompono.
+    for _v in 17 16 15; do
+        if command -v "gcc-$_v" >/dev/null; then
+            alias gcc="gcc-$_v"
+            alias g++="g++-$_v"
+            break
+        fi
+    done
+    unset _v
+
     # VS Code
     [[ -d "/Applications/Visual Studio Code.app" ]] && \
         alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code'
