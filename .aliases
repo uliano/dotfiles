@@ -32,7 +32,9 @@
 # openocd_stm -f interface/stlink.cfg -f target/stm32f4x.cfg
 # openocd_stm -f board/st_nucleo_f4.cfg
 
-alias openocd_stm='/opt/openocd_stm/bin/openocd'
+# Solo dove la build custom esiste (Linux). Su Mac c'e' l'openocd di brew,
+# che dalla 0.12 include comunque il grosso del supporto ST.
+[[ -x /opt/openocd_stm/bin/openocd ]] && alias openocd_stm='/opt/openocd_stm/bin/openocd'
 
 # ====================================================================
 # FUTURE CUSTOM TOOLS

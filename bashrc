@@ -9,10 +9,6 @@ case $- in
       *) return;;
 esac
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
-HISTCONTROL=ignoreboth
-
 # append to the history file, don't overwrite it
 shopt -s histappend
 
@@ -97,11 +93,13 @@ if [ -x /usr/bin/dircolors ]; then
     alias ls='ls --color=auto'
     #alias dir='dir --color=auto'
     #alias vdir='vdir --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
 fi
+
+# --color=auto funziona sia con GNU grep (Linux) che BSD grep (macOS),
+# quindi sta fuori dal guard dircolors (che e' solo Linux).
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 
 # colored GCC warnings and errors
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
@@ -112,8 +110,6 @@ fi
 # Default ls aliases (will be overridden by modern tools if available)
 alias ls="ls --color=auto"
 alias lr="ls -ltrh --color=auto"
-alias open='xdg-open'  # macOS-like open command
-
 # Common aliases
 alias ll='ls -la'
 alias la='ls -A'
@@ -254,6 +250,12 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
     # Add common Linux paths
     [[ -d "/usr/local/bin" ]] && export PATH="/usr/local/bin:$PATH"
 
+    alias open='xdg-open'
+
+    # Add an "alert" alias for long running commands (notify-send e' solo Linux).
+    # Use like so:  sleep 10; alert
+    alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
 fi
 
 # Common embedded toolchains (both platforms)
@@ -295,10 +297,6 @@ fi
 # NB: installare nel default con `pip install`, NON `uv pip` (vedi windows-setup.md).
 [[ -d "$HOME/.venvs/py314/bin" ]] && export PATH="$HOME/.venvs/py314/bin:$PATH"
 
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -311,11 +309,14 @@ fi
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
+# Su macOS serve `brew install bash-completion@2` (terzo ramo).
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
   elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
+  elif [ -r /opt/homebrew/etc/profile.d/bash_completion.sh ]; then
+    . /opt/homebrew/etc/profile.d/bash_completion.sh
   fi
 fi
 
