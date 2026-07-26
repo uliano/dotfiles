@@ -31,6 +31,7 @@ ln -sf "$(pwd)/bash_profile" ~/.bash_profile
 ln -sf "$(pwd)/.aliases" ~/.aliases
 mkdir -p ~/.config && ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
 ln -sf "$(pwd)/ssh_config" ~/.ssh/config
+ln -sf "$(pwd)/gdbinit" ~/.gdbinit
 source ~/.bashrc
 ```
 
@@ -344,6 +345,7 @@ Auto-initialized in `.bashrc`:
 | `.bash_profile` | Login shell (sources .bashrc) |
 | `.aliases` | Custom tool aliases |
 | `starship.toml` | Starship prompt config |
+| `.gdbinit` | gdb: auto-load safe-path per /sw (pretty printer STL del gcc compilato da sorgente) |
 | `.bash_history` | Command history (auto-managed) |
 | `.fzf.bash` | FZF bash integration (auto-generated) |
 
