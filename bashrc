@@ -274,6 +274,8 @@ fi
 [[ -d "/sw/arm-none-eabi/bin" ]] && export PATH=/sw/arm-none-eabi/bin:$PATH
 [[ -d "/sw/avr/bin" ]] && export PATH=/sw/avr/bin:$PATH
 [[ -d "/sw/gcc/bin" ]] && export PATH=/sw/gcc/bin:$PATH   # gcc nativo 16.x (shadowa il gcc di sistema)
+[[ -d "/sw/cmake/bin" ]] && export PATH=/sw/cmake/bin:$PATH  # cmake 4.x da sorgente (build-devtools.sh)
+[[ -d "/sw/gdb/bin" ]] && export PATH=/sw/gdb/bin:$PATH      # gdb 17.x da sorgente (build-devtools.sh)
 
 # ====================================================================
 # PYENV CONFIGURATION
