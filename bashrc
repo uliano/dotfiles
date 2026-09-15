@@ -365,4 +365,4 @@ command -v starship >/dev/null && eval "$(starship init bash)"
 
 
 # kimi-code
-export PATH="/home/uliano/.kimi-code/bin:$PATH"
+[[ -d "$HOME/.kimi-code/bin" ]] && export PATH="$HOME/.kimi-code/bin:$PATH"
