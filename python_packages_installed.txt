@@ -203,6 +203,28 @@ torch         # dipendenza di docling — build CPU o CUDA? dipende dalla macchi
 ##   - iGPU via ROCm: possibile ma capriccioso sulle iGPU, e la banda di memoria e'
 ##     condivisa con la CPU. Non e' la prima mossa da tentare.
 ##
+## Linux TUXEDO OS Debian (desktop "tux", Debian forky): Ryzen 9 3900XT + RTX 5060 Ti 16 GB
+##   (Blackwell, sm_120), nvidia-driver-open 580 (moduli kernel open, obbligatori su Blackwell).
+##   Configurato 2026-09-11 con 2x GTX 1080 (Pascal, torch cu126); GPU sostituita il 2026-09-15.
+##   - torch: Blackwell vuole CUDA 13 (sm_120). Il default PyPI (2.14) e' gia' cu130, ma per
+##     essere espliciti si usa l'index cu130; torch e torchvision INSIEME:
+##       pip install --index-url https://download.pytorch.org/whl/cu130 torch torchvision
+##     -> 2.14.0+cu130 / 0.29.0+cu130, cuda.is_available() True, matmul e cuDNN OK.
+##   - TRAPPOLA 1: passando da una build all'altra (es. cu126 -> cu130) "torch==2.14.0" NON
+##     basta: pip vede 2.14.0+cu126 come gia' soddisfatto. Va pinnata la local version:
+##       pip install --index-url .../cu130 'torch==2.14.0+cu130' 'torchvision==0.29.0+cu130'
+##   - TRAPPOLA 2: i wheel nvidia-*-cu12 restano orfani dopo il cambio. Condividono i path
+##     nvidia/<lib>/lib/ con i cu13 (nome senza suffisso, o -cu13): disinstallarli cancella
+##     libcudnn.so.9 e simili ai cu13 (ImportError all'import di torch). Rimedio:
+##       pip install --force-reinstall --no-deps --index-url .../cu130 \
+##           $(pip list | awk '/^nvidia-/{printf "%s==%s ", $1, $2}')
+##     Stessa famiglia della trappola nccl cu12/cu13 vista con xgboost: e' sempre lo stesso
+##     meccanismo, due wheel diversi che scrivono lo stesso file.
+##   - xgboost: ancora xgboost-cpu (scelto ai tempi di Pascal). Con Blackwell la wheel GPU
+##     3.4.1 (CUDA 13) funzionerebbe, se mai servisse il training su GPU.
+##   - `pip list | grep -iE 'nvidia|cuda|triton'` qui NON e' vuoto: legittimo (torch cu130).
+##     Deve pero' essere SENZA suffisso cu12: solo nvidia-<lib> e nvidia-<lib>-cu13.
+##
 ## Windows workstation: DA VERIFICARE con nvidia-smi, e annotare qui l'esito.
 ## Altra macchina Windows: DA VERIFICARE.
 ## macOS: mai CUDA. Per torch, backend MPS su Apple Silicon.
