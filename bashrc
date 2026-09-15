@@ -363,3 +363,6 @@ command -v starship >/dev/null && eval "$(starship init bash)"
 
 
 
+
+# kimi-code
+export PATH="/home/uliano/.kimi-code/bin:$PATH"
