@@ -163,6 +163,9 @@ command -v batcat >/dev/null && alias bat='batcat'
 [[ -d "$HOME/edirect" ]] && export PATH="$HOME/edirect:$PATH"
 [[ -d "$HOME/bin/sratoolkit.3.0.0-ubuntu64" ]] && export PATH=~/bin/sratoolkit.3.0.0-ubuntu64/bin:$PATH
 
+# brio
+[[ -d "$HOME/projects/brio/bin" ]] && export PATH="$HOME/projects/brio/bin:$PATH"
+
 # ====================================================================
 # LOCALE
 # ====================================================================
