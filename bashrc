@@ -335,9 +335,29 @@ fi
 # Cargo environment
 [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# ====================================================================
+# NODE / NVM: TOLTO, E PERCHE'
+# ====================================================================
+# nvm era entrato per Claude Code, quando si installava come pacchetto
+# npm globale (vedi il vecchio PATH su node_modules/.bin, tolto come
+# obsoleto). Oggi claude e kimi sono binari nativi, e su questa
+# macchina non restava un solo pacchetto globale oltre a npm e
+# corepack, ne' un progetto node: gli unici node_modules erano quelli
+# delle estensioni di VS Code, che girano sul node di VS Code. Le
+# ultime due invocazioni di npm registrate erano `npm config get
+# prefix` e `npm ls -g --depth 0`, cioe' Claude Code che controllava di
+# non essere piu' un pacchetto npm. Sorgere nvm.sh costava 88 ms dei
+# 148 che costa aprire una shell, per un comando che non usava nessuno.
+#
+# SULLE ALTRE MACCHINE: se ~/.nvm c'e' ancora, guarda
+# `npm ls -g --depth 0`; se non elenca niente di tuo e' un residuo
+# (qui erano 236 MB) e si toglie con `rm -rf ~/.nvm ~/.npm`.
+#
+# SE UN GIORNO NODE SERVE DAVVERO: si installa allora, scegliendo la
+# versione che serve in quel momento; e se torna nvm, torna caricato
+# pigramente - il PATH della versione installata messo qui e una
+# funzione `nvm` che sorge nvm.sh alla prima invocazione, cosi' i
+# processi figli vedono node e la shell non paga gli 88 ms.
 
 if [[ -d "$HOME/micromamba" ]]; then
     # >>> mamba initialize >>>
