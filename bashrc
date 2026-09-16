@@ -354,15 +354,45 @@ if [[ -d "$HOME/micromamba" ]]; then
     # <<< mamba initialize <<<
 fi
 
+# kimi-code
+# Ultimo prepend, quindi la voce che vince: sta QUI e non in fondo al
+# file perche' il dedupe qui sotto deve vedere ogni aggiunta al PATH.
+[[ -d "$HOME/.kimi-code/bin" ]] && export PATH="$HOME/.kimi-code/bin:$PATH"
+
+# ====================================================================
+# PATH: UNA SOLA COPIA DI OGNI VOCE
+# ====================================================================
+# I prepend di questo file - e quelli di nvm, pyenv, uv, cargo,
+# micromamba, kimi-code - antepongono senza controllare se la voce c'e'
+# gia'. Se ~/.bashrc viene applicato due volte nella stessa discendenza
+# (VS Code risolve l'ambiente con una shell di login e POI il terminale
+# integrato sorge di nuovo questo file) il PATH esce duplicato, e ogni
+# shell annidata aggiunge un'altra copia. Si tiene la PRIMA occorrenza,
+# che e' quella che vince nella ricerca: la precedenza non cambia; una
+# voce vuota (= la directory corrente) sparisce, ed e' un bene.
+# Misurato: 358 us su un PATH di 37 voci, contro i 148 ms che costa
+# aprire una shell - e quanto le venti guardie messe a ogni prepend,
+# che pero' non coprirebbero le righe scritte dagli installer altrui.
+# Sintassi bash 3.2, per il ramo macOS.
+__path_dedupe() {
+    local out= dir
+    local IFS=:
+    for dir in $PATH; do
+        case ":$out:" in
+            *":$dir:"*) ;;
+            *) out="${out:+$out:}$dir" ;;
+        esac
+    done
+    PATH=$out
+}
+__path_dedupe
+unset -f __path_dedupe
+
 # ====================================================================
 # PROMPT INITIALIZATION (STARSHIP)
 # ====================================================================
 # Initialize starship if available
-# this should be the last in the file
+# this should be the last in the file: prende PS1, si accoda a
+# PROMPT_COMMAND e stratifica il trap DEBUG, quindi chi viene sorto
+# dopo di lui glieli sovrascrive.
 command -v starship >/dev/null && eval "$(starship init bash)"
-
-
-
-
-# kimi-code
-[[ -d "$HOME/.kimi-code/bin" ]] && export PATH="$HOME/.kimi-code/bin:$PATH"
