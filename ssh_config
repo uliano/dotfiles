@@ -3,6 +3,11 @@ Match user root host xlence,xlence2,node*,ngs,licensebox,elenuar,licsrv,192.168.
     IdentityFile ~/.ssh/xlence-id-ed25519
     StrictHostKeyChecking no
     UserKnownHostsFile /dev/null
+    # Una sola connessione TCP per tutti i comandi: da fuori ateneo/VPN la protezione
+    # anti-brute-force di xlence (iptables recent) rifiuta dalla 7a connessione in 300s.
+    ControlMaster auto
+    ControlPath ~/.ssh/cm-%r@%h:%p
+    ControlPersist 10m
 
 Host *
   ServerAliveInterval 60
