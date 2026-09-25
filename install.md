@@ -462,3 +462,55 @@ starship config            # Edit config
 starship explain           # Debug prompt
 starship toggle <module>   # Toggle module
 ```
+
+## 5. udev: USB senza regole per vendor
+
+Su una macchina personale chi la usa deve poter parlare con qualsiasi
+dispositivo USB che infila (sonde di debug, programmatori, DFU, analizzatori
+logici) senza una regola per ogni vendor id. Un solo file generico,
+`/etc/udev/rules.d/70-local-usb-uaccess.rules`, installato su tux e mele il
+2026-09-25 (sul portatile: da fare alla reinstallazione):
+
+```
+# Local policy: whoever uses this machine may talk to any USB device they plug
+# in, without a per-vendor rule (debug probes, programmers, DFU bootloaders,
+# logic analyzers...).
+#
+# TAG+="uaccess" makes logind put an ACL for the active local (seat) user on
+# the device node (see 73-seat-late.rules). That only works for a console
+# session: on a headless box used over ssh/xrdp there is no seat, so the
+# plugdev group is what actually grants access there. Vendor rules in 99-*
+# may still override GROUP/MODE for their own devices; the tag survives.
+SUBSYSTEM=="usb", TAG+="uaccess", GROUP="plugdev", MODE="0664"
+
+# USB serial adapters: default is already dialout/0660, add the seat ACL so
+# dialout membership is not required.
+KERNEL=="ttyACM*|ttyUSB*", TAG+="uaccess"
+
+# HID-class tools (CMSIS-DAP v1 probes, DAPLink, some programmers) show up as
+# hidraw, root-only by default.
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", TAG+="uaccess"
+```
+
+Attivazione e verifica senza riavviare:
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=usb --subsystem-match=tty --subsystem-match=hidraw --action=change
+sudo udevadm settle
+getfacl -p /dev/bus/usb/001/003      # deve comparire user:uliano:rw- (solo con seat locale)
+udevadm info -q property /dev/bus/usb/001/003 | grep TAGS   # :seat:uaccess:
+```
+
+Il numero 70 conta: deve venire dopo `50-udev-default` e prima di
+`73-seat-late.rules`, che è quella che applica l'ACL.
+
+Le vecchie regole per vendor (69-probe-rs, 99-ch340-serial, 99-edbg-debuggers,
+99-Kingst, 99-raspberrypi) **non servono più**: provato il 2026-09-25 su tux
+rinominandole in `.bak` e collegando WCH-Link, ST-Link V2.1, Atmel-ICE e
+Kingst. Tutti i nodi apribili in rw dall'utente, `probe-rs list` vede le tre
+sonde e openocd apre ST-Link e Atmel-ICE. Non reinstallarle. Nota: il
+pacchetto Debian `openocd` porta già `/usr/lib/udev/rules.d/60-openocd.rules`
+con un centinaio di sonde. Restano solo le regole non di permessi:
+`77-mm-huawei-configuration` (ModemManager) e `99-webcam` (TUXEDO Control
+Center).
