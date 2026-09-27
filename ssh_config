@@ -1,3 +1,7 @@
+# macOS: XQuartz ships xauth in /opt/X11 (on Linux the default /usr/bin/xauth is used)
+Match exec "test -x /opt/X11/bin/xauth"
+    XAuthLocation /opt/X11/bin/xauth
+
 # Root access to cluster nodes - uses xlence-id-ed25519 key
 Match user root host xlence,xlence2,node*,ngs,licensebox,elenuar,licsrv,192.168.60.*,159.149.32.*
     IdentityFile ~/.ssh/xlence-id-ed25519
@@ -23,7 +27,9 @@ Host bioinfo
 Host github.com
   Hostname github.com
   Port 22
+  User git
   IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
 
 Host pi
   HostName 192.168.1.111
@@ -49,16 +55,16 @@ Host xlence2
 Host xlence
   HostName 159.149.32.133
   User uliano.guerrini
-  
+
 Host jane
   HostName 159.149.32.105
   User uliano
 
- Host nero
+Host nero
   HostName 159.149.32.106
   User uliano
 
- Host cita
+Host cita
   HostName 159.149.32.116
   User uliano
 
@@ -88,16 +94,6 @@ Host elenuar
 
 Host logbook
   HostName 159.149.32.127
-
-Host indaco1
-  HostName login1ng.indaco.unimi.it
-  ProxyJump indaco
-  User uliano.guerrini
-
-Host indaco2
-  HostName login1ng.indaco.unimi.it
-  ProxyJump indaco
-  User uliano.guerrini
 
 Host indaco
   Hostname loginng.indaco.unimi.it

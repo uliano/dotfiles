@@ -32,8 +32,19 @@ ln -sf "$(pwd)/.aliases" ~/.aliases
 mkdir -p ~/.config && ln -sf "$(pwd)/starship.toml" ~/.config/starship.toml
 ln -sf "$(pwd)/ssh_config" ~/.ssh/config
 ln -sf "$(pwd)/gdbinit" ~/.gdbinit
+mkdir -p ~/.claude && ln -sf "$(pwd)/claude/settings.json" ~/.claude/settings.json
+ln -sf "$(pwd)/claude/CLAUDE.md" ~/.claude/CLAUDE.md
 source ~/.bashrc
 ```
+
+**Claude Code:** only `claude/settings.json` (auto mode by default, reads always allowed,
+Italian conversation) and `claude/CLAUDE.md` (user-level instructions: artifacts in English)
+live in the repo — never the whole `~/.claude`, which holds history, sessions, cache and,
+on Linux, `.credentials.json` (login token). On Windows the files go in
+`%USERPROFILE%\.claude\` (symlink with Developer Mode enabled, otherwise copy).
+⚠️ Changing a setting from inside Claude (`/config`, `/model`…) writes it into the repo:
+check `git -C ~/dotfiles diff` as with bashrc, and verify with
+`ls -la ~/.claude/settings.json` that it is still a symlink.
 
 ⚠️ **Conseguenza del symlink:** `~/.bashrc` punta *dentro il repo*. Gli installer che
 appendono righe a `~/.bashrc` (nvm, rustup, fzf, conda…) scrivono nei dotfiles condivisi
@@ -346,6 +357,8 @@ Auto-initialized in `.bashrc`:
 | `.aliases` | Custom tool aliases |
 | `starship.toml` | Starship prompt config |
 | `.gdbinit` | gdb: auto-load safe-path per /sw (pretty printer STL del gcc compilato da sorgente) |
+| `claude/settings.json` | Claude Code user settings (→ `~/.claude/settings.json`) |
+| `claude/CLAUDE.md` | Claude Code user instructions (→ `~/.claude/CLAUDE.md`) |
 | `.bash_history` | Command history (auto-managed) |
 | `.fzf.bash` | FZF bash integration (auto-generated) |
 
