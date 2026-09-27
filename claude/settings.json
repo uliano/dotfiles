@@ -1,0 +1,84 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "/sw"
+    ]
+  },
+  "sandbox": {
+    "filesystem": {
+      "allowWrite": [
+        "/sw"
+      ]
+    }
+  },
+  "model": "opus",
+  "language": "italian",
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "xhigh"
+    },
+    "claude-sonnet-5": {
+      "effortLevel": "high"
+    }
+  },
+  "theme": "dark",
+  "tui": "fullscreen",
+  "agentPushNotifEnabled": false,
+  "skipAutoPermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "### Org-wide",
+      "**Organization**: DiSFeB (Dipartimento di Scienze Farmacologiche e Biomolecolari), Universita' degli Studi di Milano — operator of the xlence cluster",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: private (uliano/xlence, confirmed via gh)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: repo-local `.segreti/` directory (gitignored) holds credential mappings and keys kept off the cluster; placeholders like `<PW-CIFS-NGS>` are used in transferred docs instead of real secrets — `.segreti/` must never leave the repo",
+      "**Default / protected branches**: default branch unknown (origin/HEAD unset); no protected branches listed and rulesets not queryable here — do not assume unprotected",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: GitHub account uliano only: uliano/brio (public), uliano/brio_private (private), uliano/dotfiles, uliano/xlence (private) - no additional orgs configured",
+      "**Trusted internal domains**: xlence.disfeb.unimi.it (cluster host contacted in recent sessions)",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: xlence cluster nodes reachable at 192.168.60.201 and 192.168.60.101 (internal LAN addresses seen in recent sessions); download.truenas.com (TrueNAS update/download host contacted repeatedly)",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: `.segreti/` (gitignored credential/key mappings for the xlence cluster) — never to be committed or pushed; any file under `inventario/` or `opt-admin/` that may still contain real credentials before placeholder substitution is complete",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: the xlence cluster itself (xlence.disfeb.unimi.it and its nodes at 192.168.60.x) is a production system per repo README — any restart, kill, or destructive operation on cluster nodes/processes requires prior written decision-note per repo's own engagement rules, not just a prod-name match",
+      "**Protected deployment namespaces / environments**: None configured beyond the Sensitive remote targets heuristic — note k8s-style `-n node5`/`-n ngs`/`-n sources` namespace flags seen in transcripts are unconfirmed as production-critical beyond the general cluster caution above",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Home machines**: troll (macOS laptop), mele, tux, tuxedo (Linux) on the home LAN (192.168.1.x, *.local), all the user's own, reached from each other over ssh for builds and repository sync",
+      "**Primary use of Claude Code**: on the home machines, development of brio (a bare-metal C++ framework), its toolchains under /sw and its bench of development boards; from tuxedo also infrastructure documentation and restructuring work for the xlence cluster (software development / sysadmin hybrid)",
+      "**Trusted repo**: /home/uliano/xlence (github.com:uliano/xlence.git) — private repo; per its own README, secrets must never be committed (git status --short must not show .segreti/ before any push)",
+      "**Trusted repos (home machines)**: ~/projects/brio (github.com:uliano/brio), ~/projects/brio/private (github.com:uliano/brio_private), ~/dotfiles (github.com:uliano/dotfiles)",
+      "**Org-specific CLIs**: None configured — recent non-standard CLI usage (ip, nmcli, ping, ethtool, lsblk, dd, journalctl, etc.) reflects routine Linux network/hardware diagnostics on cluster nodes, not an org-specific tool"
+    ],
+    "allow": [
+      "$defaults",
+      "Bash(ip:addr) in /home/uliano/xlence",
+      "Bash(nmcli:*) read-only subcommands (device show, connection show) in /home/uliano/xlence"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(dd:*) targeting block devices on xlence cluster hosts",
+      "Process kill/restart commands (systemctl restart|stop, kill, pkill) against xlence.disfeb.unimi.it or its nodes without a prior decisioni/ note per repo engagement rules"
+    ]
+  }
+}
