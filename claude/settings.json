@@ -5,13 +5,16 @@
       "Glob",
       "Grep",
       "WebSearch",
-      "WebFetch"
+      "WebFetch",
+      "Bash(printf:*)"
     ],
     "defaultMode": "auto",
     "additionalDirectories": [
       "/sw"
     ]
   },
+  "model": "opus",
+  "language": "italian",
   "sandbox": {
     "filesystem": {
       "allowWrite": [
@@ -19,8 +22,6 @@
       ]
     }
   },
-  "model": "opus",
-  "language": "italian",
   "modelSettings": {
     "claude-opus-5": {
       "effortLevel": "xhigh"
@@ -35,12 +36,22 @@
       "effortLevel": "high"
     }
   },
-  "theme": "dark",
   "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
+  "theme": "dark",
   "agentPushNotifEnabled": false,
   "skipAutoPermissionPrompt": true,
-  "skipWorkflowUsageWarning": true,
   "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(ip:addr) in /home/uliano/xlence",
+      "Bash(nmcli:*) read-only subcommands (device show, connection show) in /home/uliano/xlence"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(dd:*) targeting block devices on xlence cluster hosts",
+      "Process kill/restart commands (systemctl restart|stop, kill, pkill) against xlence.disfeb.unimi.it or its nodes without a prior decisioni/ note per repo engagement rules"
+    ],
     "environment": [
       "$defaults",
       "### Org-wide",
@@ -69,16 +80,7 @@
       "**Trusted repo**: /home/uliano/xlence (github.com:uliano/xlence.git) — private repo; per its own README, secrets must never be committed (git status --short must not show .segreti/ before any push)",
       "**Trusted repos (home machines)**: ~/projects/brio (github.com:uliano/brio), ~/projects/brio/private (github.com:uliano/brio_private), ~/dotfiles (github.com:uliano/dotfiles)",
       "**Org-specific CLIs**: None configured — recent non-standard CLI usage (ip, nmcli, ping, ethtool, lsblk, dd, journalctl, etc.) reflects routine Linux network/hardware diagnostics on cluster nodes, not an org-specific tool"
-    ],
-    "allow": [
-      "$defaults",
-      "Bash(ip:addr) in /home/uliano/xlence",
-      "Bash(nmcli:*) read-only subcommands (device show, connection show) in /home/uliano/xlence"
-    ],
-    "soft_deny": [
-      "$defaults",
-      "Bash(dd:*) targeting block devices on xlence cluster hosts",
-      "Process kill/restart commands (systemctl restart|stop, kill, pkill) against xlence.disfeb.unimi.it or its nodes without a prior decisioni/ note per repo engagement rules"
     ]
-  }
+  },
+  "switchModelsOnFlag": false
 }
