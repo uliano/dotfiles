@@ -95,6 +95,14 @@ Host elenuar
 Host logbook
   HostName 159.149.32.127
 
+Host cherry
+  HostName 159.149.32.59
+
+# Cluster key only for admin: other users (e.g. SFTP as guerrini) authenticate on their own
+Match originalhost cherry user admin
+  IdentityFile ~/.ssh/xlence-id-ed25519
+  IdentitiesOnly yes
+
 Host indaco
   Hostname loginng.indaco.unimi.it
   User uliano.guerrini
