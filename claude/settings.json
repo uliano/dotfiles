@@ -27,7 +27,7 @@
       "Bash(pgrep *)",
       "Bash(stat *)"
     ],
-    "defaultMode": "auto",
+    "defaultMode": "default",
     "additionalDirectories": [
       "/sw"
     ]
