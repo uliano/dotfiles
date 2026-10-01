@@ -259,6 +259,13 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
     # Use like so:  sleep 10; alert
     alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+    # Schrodinger: local install only. The guard is false on xlence, where
+    # Schrodinger comes from environment modules.
+    if [[ -x "/sw/schrodinger2025-3/run" ]]; then
+        export SCHRODINGER=/sw/schrodinger2025-3
+        alias schrun='$SCHRODINGER/run'
+    fi
+
 fi
 
 # Common embedded toolchains (both platforms)
