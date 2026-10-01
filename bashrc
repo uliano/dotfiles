@@ -263,6 +263,9 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
     # Schrodinger comes from environment modules.
     if [[ -x "/sw/schrodinger2025-3/run" ]]; then
         export SCHRODINGER=/sw/schrodinger2025-3
+        # Appended: generic launcher names (run, xtb, blast) must not
+        # shadow system tools.
+        export PATH="$PATH:$SCHRODINGER"
         alias schrun='$SCHRODINGER/run'
     fi
 
