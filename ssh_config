@@ -106,3 +106,8 @@ Match originalhost cherry user admin
 Host indaco
   Hostname loginng.indaco.unimi.it
   User uliano.guerrini
+  IdentityFile ~/.ssh/id_ed25519
+  # Login needs password + OTP: one master connection, reused by later ssh/scp/rsync
+  ControlMaster auto
+  ControlPath ~/.ssh/cm-%r@%h:%p
+  ControlPersist 8h
