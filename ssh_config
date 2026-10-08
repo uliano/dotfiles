@@ -107,7 +107,7 @@ Host indaco
   Hostname loginng.indaco.unimi.it
   User uliano.guerrini
   IdentityFile ~/.ssh/id_ed25519
-  # Login needs password + OTP: one master connection, reused by later ssh/scp/rsync
-  ControlMaster auto
-  ControlPath ~/.ssh/cm-%r@%h:%p
-  ControlPersist 8h
+  # Public keys are not accepted: the key needs a certificate signed by the
+  # dashboard (password + OTP), valid 1 day. Renew with:
+  #   curl -sS https://dashboard.indaco.unimi.it/ssh_cert | sh -s -- -y -k ~/.ssh/id_ed25519.pub
+  CertificateFile ~/.ssh/id_ed25519-cert.pub

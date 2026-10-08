@@ -37,6 +37,14 @@
 [[ -x /opt/openocd_stm/bin/openocd ]] && alias openocd_stm='/opt/openocd_stm/bin/openocd'
 
 # ====================================================================
+# INDACO SSH certificate
+# ====================================================================
+# loginng.indaco.unimi.it accepts only keys with a certificate signed by
+# the dashboard (password + OTP), valid 1 day: run this once a day.
+# The script is fetched each time, so it follows the cluster's changes.
+alias indacootp='curl -sS https://dashboard.indaco.unimi.it/ssh_cert | sh -s -- -y -k ~/.ssh/id_ed25519.pub'
+
+# ====================================================================
 # FUTURE CUSTOM TOOLS
 # ====================================================================
 # Add other custom-compiled tools here following the same pattern:
