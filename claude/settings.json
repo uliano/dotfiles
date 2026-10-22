@@ -25,14 +25,21 @@
       "Bash(find /sw *)",
       "Bash(du *)",
       "Bash(pgrep *)",
-      "Bash(stat *)"
+      "Bash(stat *)",
+      "Agent",
+      "Monitor",
+      "SendMessage",
+      "ToolSearch",
+      "Skill",
+      "Edit(/home/uliano/dotfiles/**)"
     ],
-    "defaultMode": "default",
+    "defaultMode": "auto",
     "additionalDirectories": [
-      "/sw"
+      "/sw",
+      "/home/uliano/dotfiles"
     ]
   },
-  "model": "opus",
+  "model": "fable",
   "language": "italian",
   "sandbox": {
     "filesystem": {
@@ -49,7 +56,7 @@
       "effortLevel": "xhigh"
     },
     "claude-fable-5-1": {
-      "effortLevel": "xhigh"
+      "effortLevel": "high"
     },
     "claude-sonnet-5": {
       "effortLevel": "high"
@@ -58,11 +65,13 @@
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
+  "switchModelsOnFlag": false,
   "agentPushNotifEnabled": false,
   "skipAutoPermissionPrompt": true,
   "autoMode": {
     "allow": [
       "$defaults",
+      "In /home/uliano/projects/brio and its nested private/ repository (both the user's own, uliano/brio and uliano/brio_private): git commit, git push, gh pr merge into integration branches other than main, gh pr view/list, bin/brio flash/run/console/gate/check/prose/fit/list (the bench tool: flashing the user's own development boards is routine and reversible), cmake configure/build/upload targets, ctest, OpenOCD and gdb sessions against the user's boards, pkill/kill of openocd, gdb and script processes this session started, launching cloud sessions with `claude --cloud` under `script`, and edits under private/ and under ~/.claude/projects/-home-uliano-projects-brio/memory (the assistant's memory, a symlink into private/)",
       "Bash(ip:addr) in /home/uliano/xlence",
       "Bash(nmcli:*) read-only subcommands (device show, connection show) in /home/uliano/xlence"
     ],
@@ -100,6 +109,5 @@
       "**Trusted repos (home machines)**: ~/projects/brio (github.com:uliano/brio), ~/projects/brio/private (github.com:uliano/brio_private), ~/dotfiles (github.com:uliano/dotfiles)",
       "**Org-specific CLIs**: None configured — recent non-standard CLI usage (ip, nmcli, ping, ethtool, lsblk, dd, journalctl, etc.) reflects routine Linux network/hardware diagnostics on cluster nodes, not an org-specific tool"
     ]
-  },
-  "switchModelsOnFlag": false
+  }
 }
