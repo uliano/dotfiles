@@ -9,6 +9,7 @@ Supports **macOS**, **Linux** and **Windows** (PowerShell — vedi `windows-setu
 |---|---|---|
 | Windows (workstation) | **uv** + 3.14 | prima migrata, giugno 2026 — `windows-setup.md` |
 | Linux (TUXEDO) | **uv** + 3.14.6 | migrata 17 luglio 2026 |
+| Linux (tuxedo-mac, Mac Pro 5,1) | **uv** + 3.14.9 | installata da zero 23 ottobre 2026 — CPU senza AVX |
 | Windows (altra) | pyenv-win | da migrare |
 | macOS | pyenv | da migrare |
 

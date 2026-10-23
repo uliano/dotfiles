@@ -40,7 +40,7 @@ pingouin==0.6.1
 pyarrow==25.0.0
 
 ## FASE 3: Pacchetti Leggeri
-polars==1.42.1
+polars==1.42.1     # on CPUs without AVX: polars[rtcompat] (see tuxedo-mac below)
 openpyxl==3.1.5
 xlrd==2.0.2
 odfpy==1.4.1
@@ -54,7 +54,8 @@ pytest==9.1.1
 # Pillow==12.3.0
 
 ## PDF -> Markdown per LLM
-pymupdf4llm   # leggero e veloce, ottimizzato per LLM (CPU) — la scelta di default
+pymupdf       # 2.x includes pymupdf4llm (from pymupdf import pymupdf4llm) — the default choice
+pymupdf4llm   # 2.0 is an empty shim kept for pip; the code is in pymupdf 2.x (see below)
 markitdown    # Microsoft, supporta PDF/DOCX/XLSX e altri formati
 docling       # IBM, OCR + tabelle + figure, molto completo (CPU) -> GUI: docling serve
 torch         # dipendenza di docling — build CPU o CUDA? dipende dalla macchina:
@@ -225,6 +226,20 @@ torch         # dipendenza di docling — build CPU o CUDA? dipende dalla macchi
 ##     conflitto di file. Verificato device="cuda" (200k x 50, 200 round: 0.75 s vs 2.0 s CPU).
 ##   - `pip list | grep -iE 'nvidia|cuda|triton'` qui NON e' vuoto: legittimo (torch cu130).
 ##     Deve pero' essere SENZA suffisso cu12: solo nvidia-<lib> e nvidia-<lib>-cu13.
+##
+## Linux TUXEDO OS "tuxedo-mac": Mac Pro 5,1, 2x Xeon X5650 (Westmere) + Radeon HD 5770
+##   -> NESSUNA NVIDIA. Configured 2026-10-23: torch 2.14.1+cpu, xgboost-cpu 3.4.1.
+##   ⚠️ CPU WITHOUT AVX (only SSE4.2/POPCNT, i.e. x86-64-v2). Every package was
+##   smoke-tested (import + one small operation) and everything works EXCEPT:
+##   - polars: the default runtime (polars-runtime-32) needs AVX2/FMA/BMI and dies
+##     with SIGILL (rc=132) on import. Fix: `pip install 'polars[rtcompat]'`, polars
+##     then picks polars-runtime-compat by itself. statsmodels crashed too, only
+##     because it imports polars.
+##   - Check on any new old-CPU machine: grep -owE 'avx2?' /proc/cpuinfo | sort -u
+##
+## pymupdf4llm 2.0 (2026-10-19) is an EMPTY package: the code moved into pymupdf 2.x,
+## which pip does not pull in by itself -> `pip install -U pymupdf` and import it as
+## `from pymupdf import pymupdf4llm` (bare `import pymupdf4llm` fails with 2.x).
 ##
 ## Windows workstation: DA VERIFICARE con nvidia-smi, e annotare qui l'esito.
 ## Altra macchina Windows: DA VERIFICARE.

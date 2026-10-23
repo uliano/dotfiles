@@ -346,6 +346,10 @@ Auto-initialized in `.bashrc`:
 [[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
 ```
 
+With fzf from apt (`sudo apt install fzf`, no `~/.fzf.bash`) the `bashrc` sources
+`/usr/share/doc/fzf/examples/key-bindings.bash` instead; completion comes from
+bash-completion.
+
 ---
 
 ## Configuration Files Summary
@@ -527,3 +531,79 @@ pacchetto Debian `openocd` porta già `/usr/lib/udev/rules.d/60-openocd.rules`
 con un centinaio di sonde. Restano solo le regole non di permessi:
 `77-mm-huawei-configuration` (ModemManager) e `99-webcam` (TUXEDO Control
 Center).
+
+## 10. Discover without a password (polkit)
+
+On a machine where the user already has passwordless sudo, Discover's password
+prompt protects nothing. `/etc/polkit-1/rules.d/49-sudo-software-nopasswd.rules`
+(installed on tuxedo-mac 2026-10-23; 49 so it runs before TUXEDO's
+`50-tuxedo-password.rules`):
+
+```js
+// Local policy: members of the sudo group, in an active local session, may
+// install/update software from Discover (PackageKit, Flatpak, firmware via
+// fwupd) without typing their password. They could do it anyway with
+// passwordless sudo; this only removes the prompt from the GUI.
+polkit.addRule(function(action, subject) {
+    if ((action.id.indexOf("org.freedesktop.packagekit.") == 0 ||
+         action.id.indexOf("org.freedesktop.Flatpak.") == 0 ||
+         action.id.indexOf("org.freedesktop.fwupd.") == 0) &&
+        subject.local && subject.active && subject.isInGroup("sudo")) {
+        return polkit.Result.YES;
+    }
+});
+```
+
+polkitd reloads rules by itself. Check:
+`pkcheck --action-id org.freedesktop.packagekit.package-install --process $$ && echo YES`.
+
+Passwordless sudo itself: `sudo visudo -f /etc/sudoers.d/uliano` with
+`uliano ALL=(ALL) NOPASSWD: ALL`.
+
+## 11. CIFS automount: eberiniShare
+
+`//159.149.32.59/eberiniShare` mounted on first access at `~/eberiniShare`,
+unmounted after 10 minutes idle (tuxedo-mac, 2026-10-23). Credentials live in
+a root-only file, not in fstab: the password contains a comma, which fstab
+would read as an option separator.
+
+```bash
+sudo mkdir -p -m 700 /etc/samba-credentials
+sudo tee /etc/samba-credentials/eberini <<'X'   # chmod 600 afterwards
+username=guerrini
+password=...
+X
+mkdir -p ~/eberiniShare
+```
+
+`/etc/fstab`:
+
+```
+//159.149.32.59/eberiniShare /home/uliano/eberiniShare cifs credentials=/etc/samba-credentials/eberini,uid=1000,gid=1000,file_mode=0644,dir_mode=0755,iocharset=utf8,noauto,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=10min,x-systemd.mount-timeout=15s 0 0
+```
+
+Then `sudo systemctl daemon-reload && sudo systemctl start home-uliano-eberiniShare.automount`.
+Off the network, boot does not wait and an access fails after 15 s.
+
+## 12. Data disk: /data and /scratch
+
+tuxedo-mac (2026-10-23): the 4 TB HDD is one btrfs partition (label `data`)
+with subvolume `@data` on `/data` and a nested subvolume `@data/scratch`, so
+snapshots of `/data` leave scratch out. `/scratch -> /data/scratch` because
+Schrodinger jobs run in `/scratch/<user>` (same path as on tux, where
+`/scratch` is a btrfs subvolume on the system disk).
+
+```bash
+printf 'label: gpt\n,,L\n' | sudo sfdisk /dev/sdX      # sgdisk is not installed
+sudo sfdisk --part-label /dev/sdX 1 data
+sudo mkfs.btrfs -L data /dev/sdX1
+sudo mount /dev/sdX1 /mnt
+sudo btrfs subvolume create /mnt/@data
+sudo btrfs subvolume create /mnt/@data/scratch
+sudo umount /mnt
+# fstab (UUID from blkid; nofail: boot does not hang if the disk is missing)
+# UUID=... /data btrfs subvol=/@data,noatime,compress=zstd,nofail,x-systemd.device-timeout=10s 0 0
+sudo mkdir /data && sudo mount /data
+sudo chown $USER: /data /data/scratch && mkdir /data/scratch/$USER
+sudo ln -s /data/scratch /scratch
+```
