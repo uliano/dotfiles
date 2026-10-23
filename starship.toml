@@ -11,6 +11,13 @@
 # Increased to 3000ms for pyenv-win on Windows (was 1000ms)
 command_timeout = 3000
 
+# Timeout for the directory scan (ms), default 30. The scan follows symlinks
+# with stat(): ~/eberiniShare -> /cherry/uliano is a CIFS share whose root
+# stat costs a 20-60 ms network round trip (actimeo=1), which tripped the
+# default and printed "Scanning current directory timed out" on every prompt
+# opened in ~ (tuxedo-mac, 2026-10-23).
+scan_timeout = 300
+
 # newline between commands
 add_newline = false
 
