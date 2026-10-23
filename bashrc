@@ -259,14 +259,51 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
     # Use like so:  sleep 10; alert
     alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-    # Schrodinger: local install only. The guard is false on xlence, where
-    # Schrodinger comes from environment modules.
-    if [[ -x "/sw/schrodinger2025-3/run" ]]; then
-        export SCHRODINGER=/sw/schrodinger2025-3
-        # Appended: generic launcher names (run, xtb, blast) must not
-        # shadow system tools.
-        export PATH="$PATH:$SCHRODINGER"
-        alias schrun='$SCHRODINGER/run'
+    # Local scientific software (Schrodinger, MOE). Skipped where Lmod is
+    # present (xlence): there `module load` sets SCHRODINGER/MOE and PATH
+    # itself from /sw/<pkg>/<version>, and a second definition here would
+    # fight it. LMOD_CMD is set by /etc/profile.d/lmod.sh (login shells) and
+    # /etc/bash.bashrc (interactive shells), both read before ~/.bashrc.
+    if [[ -z "$LMOD_CMD" ]]; then
+
+        # Schrodinger: the two install locations are mutually exclusive, so
+        # the first match wins.
+        for _schro in /sw/schrodinger2025-3 /opt/schrodinger2025-3; do
+            if [[ -x "$_schro/run" ]]; then
+                export SCHRODINGER="$_schro"
+                # Appended: generic launcher names (run, xtb, blast) must not
+                # shadow system tools.
+                export PATH="$PATH:$SCHRODINGER"
+                alias schrun='$SCHRODINGER/run'
+                # Maestro ships libstdc++.so.6.0.29 (GLIBCXX <= 3.4.29) ahead
+                # of the system one on LD_LIBRARY_PATH. Mesa's DRI drivers
+                # link libLLVM.so.20, which needs GLIBCXX_3.4.30, so the
+                # driver fails to load, GLX reports no fbconfig and Maestro
+                # aborts in QOpenGLContext::create(). Preloading the newer
+                # system libstdc++ (backward compatible) restores native GL.
+                if [[ -r /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ]]; then
+                    maestro() {
+                        LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 \
+                            "$SCHRODINGER/maestro" "$@"
+                    }
+                fi
+                break
+            fi
+        done
+        unset _schro
+
+        # MOE: versioned dirs, glob sorted ascending, so the last match wins
+        # (newest version, /opt over /sw).
+        for _moe in /sw/moe20* /opt/moe20*; do
+            [[ -x "$_moe/bin/moe" ]] && export MOE="$_moe"
+        done
+        unset _moe
+        if [[ -n "$MOE" ]]; then
+            alias moe='$MOE/bin/moe'
+            alias licenze='$MOE/lm/bin/lmutil lmstat -c $MOE/license.dat -a'
+            export PATH="$PATH:$MOE/bin"
+        fi
+
     fi
 
 fi
@@ -341,6 +378,10 @@ fi
 # ====================================================================
 # FZF integration (cross-platform)
 [[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+# apt's fzf ships the key bindings (Ctrl+R/Ctrl+T/Alt+C) but does not enable
+# them; completion is already picked up by bash-completion.
+[[ -f ~/.fzf.bash ]] || { [[ -f /usr/share/doc/fzf/examples/key-bindings.bash ]] && \
+    source /usr/share/doc/fzf/examples/key-bindings.bash; }
 
 # Cargo environment
 [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
