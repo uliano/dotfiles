@@ -562,10 +562,20 @@ Passwordless sudo itself: `sudo visudo -f /etc/sudoers.d/uliano` with
 
 ## 11. CIFS automount: eberiniShare
 
-`//159.149.32.59/eberiniShare` mounted on first access at `~/eberiniShare`,
-unmounted after 10 minutes idle (tuxedo-mac, 2026-10-23). Credentials live in
-a root-only file, not in fstab: the password contains a comma, which fstab
-would read as an option separator.
+`//159.149.32.59/eberiniShare` mounted on first access at `/cherry/uliano`,
+unmounted after 10 minutes idle (tuxedo-mac, 2026-10-23); `~/eberiniShare` is a
+symlink to it, as on xlence (`~/eberiniShare -> /cherry/<user>`). One mount per
+user, with `uid`, `file_mode=0600` and `dir_mode=0700` of that user: the
+credentials are personal, so a shared mountpoint would let another local user
+act on the server as guerrini. A second user gets their own fstab line (or
+the autofs program map used on xlence). The mountpoint
+must stay outside `$HOME`: anything that scans the home directory (starship's
+prompt, Claude Code's file walk, Dolphin) would otherwise stat the autofs
+mountpoint and either trigger the mount or block behind one in progress
+(seen as `starship::context: Scanning current directory timed out`). A symlink
+is skipped by lstat-based scanners. Credentials live in a root-only file, not
+in fstab: the password contains a comma, which fstab would read as an option
+separator.
 
 ```bash
 sudo mkdir -p -m 700 /etc/samba-credentials
@@ -573,16 +583,17 @@ sudo tee /etc/samba-credentials/eberini <<'X'   # chmod 600 afterwards
 username=guerrini
 password=...
 X
-mkdir -p ~/eberiniShare
+sudo mkdir -p /cherry/uliano
+ln -s /cherry/uliano ~/eberiniShare
 ```
 
 `/etc/fstab`:
 
 ```
-//159.149.32.59/eberiniShare /home/uliano/eberiniShare cifs credentials=/etc/samba-credentials/eberini,uid=1000,gid=1000,file_mode=0644,dir_mode=0755,iocharset=utf8,noauto,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=10min,x-systemd.mount-timeout=15s 0 0
+//159.149.32.59/eberiniShare /cherry/uliano cifs credentials=/etc/samba-credentials/eberini,uid=1000,gid=1000,file_mode=0600,dir_mode=0700,iocharset=utf8,noauto,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=10min,x-systemd.mount-timeout=15s 0 0
 ```
 
-Then `sudo systemctl daemon-reload && sudo systemctl start home-uliano-eberiniShare.automount`.
+Then `sudo systemctl daemon-reload && sudo systemctl start cherry-uliano.automount`.
 Off the network, boot does not wait and an access fails after 15 s.
 
 ## 12. Data disk: /data and /scratch
