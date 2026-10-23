@@ -40,6 +40,20 @@ Host mele
   IdentityFile ~/.ssh/id_ed25519
   IdentitiesOnly yes
 
+# mele over Tailscale (mele.tail902a66.ts.net), for use away from home
+Host meletail
+  Hostname 100.102.40.65
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+
+# tux over Tailscale (tux.tail902a66.ts.net); at home it is tux.local
+Host tuxtail
+  Hostname 100.91.29.7
+
+# tuxedo-mac over Tailscale (tuxedo-mac.tail902a66.ts.net); in the office use tuxedo-mac
+Host tuxedotail
+  Hostname 100.80.229.95
+
 Host riscv
   HostName 192.168.1.22
   User uliano
@@ -56,7 +70,7 @@ Host xlence
   HostName 159.149.32.133
   User uliano.guerrini
 
-Host jane
+Host tuxedo-mac
   HostName 159.149.32.105
   User uliano
 

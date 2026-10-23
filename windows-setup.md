@@ -146,7 +146,7 @@ python script.py         # Secondo suggerimento in ListView
 - GitHub (con chiave id_ed25519)
 - Host locali (pi, mele, riscv, orange3b)
 - Server UNIMI (xlence, xlence2, indaco, indaco1, indaco2)
-- Server lab (jane, nero, cita, huey, dewey, louie, licsrv, licensebox, elenuar, logbook)
+- Server lab (tuxedo-mac, nero, cita, huey, dewey, louie, licsrv, licensebox, elenuar, logbook)
 
 **Opzioni globali:**
 - ServerAliveInterval: 60 (keep-alive)
