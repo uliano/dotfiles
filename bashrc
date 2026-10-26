@@ -233,8 +233,10 @@ if [[ "$OS_TYPE" == "macos" ]]; then
     alias licenze='$MOE/lm/bin/lmutil lmstat -c $MOE/license.dat -a'
     [[ -d "$MOE/bin" ]] && export PATH="$PATH:$MOE/bin"
 
-    # Schrodinger
-    export SCHRODINGER=/opt/schrodinger/suites2025-3/
+    # Schrodinger (2026-3, the release of the cluster's Job Server: client and server
+    # must match). Licenses: /opt/schrodinger/licenses/*.serverid.lic, the default
+    # search path on macOS, same file as on xlence; no SCHROD_LICENSE_FILE needed.
+    export SCHRODINGER=/opt/schrodinger/suites2026-3
     export SCHRODINGER_SCRIPTS=/opt/schrodinger/schrodinger_utils/scripts
     alias schrun='$SCHRODINGER/run'
 

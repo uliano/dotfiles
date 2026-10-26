@@ -53,7 +53,7 @@
       "effortLevel": "xhigh"
     },
     "claude-opus-5-5": {
-      "effortLevel": "xhigh"
+      "effortLevel": "high"
     },
     "claude-fable-5-1": {
       "effortLevel": "high"
@@ -67,18 +67,19 @@
   "theme": "dark",
   "switchModelsOnFlag": false,
   "agentPushNotifEnabled": false,
-  "skipAutoPermissionPrompt": true,
   "autoMode": {
     "allow": [
       "$defaults",
       "In /home/uliano/projects/brio and its nested private/ repository (both the user's own, uliano/brio and uliano/brio_private): git commit, git push, gh pr merge into integration branches other than main, gh pr view/list, bin/brio flash/run/console/gate/check/prose/fit/list (the bench tool: flashing the user's own development boards is routine and reversible), cmake configure/build/upload targets, ctest, OpenOCD and gdb sessions against the user's boards, pkill/kill of openocd, gdb and script processes this session started, launching cloud sessions with `claude --cloud` under `script`, and edits under private/ and under ~/.claude/projects/-home-uliano-projects-brio/memory (the assistant's memory, a symlink into private/)",
       "Bash(ip:addr) in /home/uliano/xlence",
-      "Bash(nmcli:*) read-only subcommands (device show, connection show) in /home/uliano/xlence"
+      "Bash(nmcli:*) read-only subcommands (device show, connection show) in /home/uliano/xlence",
+      "xlence cluster administration (EXPLICITLY AUTHORIZED by the user, who is the cluster's sole administrator with passwordless sudo on every host): any Bash command that runs ssh, scp, sudo ssh, sudo scp or `ssh ... sudo` towards xlence, xlence2, node1-node5, ngs, fat1, old, jobsrv, nas01, nas02, 192.168.60.x, 159.149.32.x or *.disfeb.unimi.it, including as root: editing files under /etc, /opt, /srv, /sw and user homes; creating users and directories; installing packages; systemctl enable/start/restart/stop/reload of services; iptables and ufw rules; libvirt/virsh VM creation and management; LVM operations; NFS mounts; Slurm configuration, scontrol and sacctmgr changes; writing files on remote hosts via heredocs, tee or redirection. 'Modify Shared Resources' and 'Remote Shell Writes' on these hosts are routine for this user and are allowed."
     ],
     "soft_deny": [
       "$defaults",
-      "Bash(dd:*) targeting block devices on xlence cluster hosts",
-      "Process kill/restart commands (systemctl restart|stop, kill, pkill) against xlence.disfeb.unimi.it or its nodes without a prior decisioni/ note per repo engagement rules"
+      "dd, mkfs, wipefs or lvremove targeting block devices or logical volumes on xlence cluster hosts that the user did not name in the request",
+      "scancel of other users' Slurm jobs on the xlence cluster (the user's standing rule: never cancel other people's jobs)",
+      "reboot or poweroff of the login nodes xlence or xlence2 unless the user asked for it in this conversation"
     ],
     "environment": [
       "$defaults",
@@ -99,7 +100,7 @@
       "**Internal package registry**: None configured",
       "**Sensitive data locations & audiences**: `.segreti/` (gitignored credential/key mappings for the xlence cluster) — never to be committed or pushed; any file under `inventario/` or `opt-admin/` that may still contain real credentials before placeholder substitution is complete",
       "**Data retention / declassification**: None configured",
-      "**Sensitive remote targets**: the xlence cluster itself (xlence.disfeb.unimi.it and its nodes at 192.168.60.x) is a production system per repo README — any restart, kill, or destructive operation on cluster nodes/processes requires prior written decision-note per repo's own engagement rules, not just a prod-name match",
+      "**Sensitive remote targets**: the xlence cluster (xlence.disfeb.unimi.it, xlence2, node1-5, ngs, fat1, old, the VM jobsrv at 159.149.32.104 / 192.168.60.13, the NAS at 192.168.60.101 and .103) is the user's own system and the user is its sole administrator with passwordless sudo on every host. Routine administration over ssh — config edits, service restarts, package installs, user and VM creation, firewall rules, Slurm changes — is authorized without any decision note: the repo's decisioni/ notes document choices, they are not a gate. Hold back only on: cancelling other users' Slurm jobs, wiping disks or volumes the user did not name, rebooting the login nodes xlence/xlence2 without being asked",
       "**Protected deployment namespaces / environments**: None configured beyond the Sensitive remote targets heuristic — note k8s-style `-n node5`/`-n ngs`/`-n sources` namespace flags seen in transcripts are unconfirmed as production-critical beyond the general cluster caution above",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
