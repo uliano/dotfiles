@@ -287,17 +287,21 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
                 # (RX 580, radeonsi, Mesa 26.1) where libgallium links
                 # libLLVM.so.20.1 (GLIBCXX_3.4.32) and Maestro aborts without
                 # the preload, opens fine with it.
-                # QT_WIDGETS_RHI=1: with Maestro's bundled Qt 6.5 on X11 the
-                # workspace (a QOpenGLWidget) is composed into the window by
-                # the software backing store and its frames are never
-                # presented: the structure appears once, misplaced, and does
-                # not rotate (verified 2026-10-27 on tux-umac, radeonsi, Mesa
-                # 26.1: 30 rotate events, pixel-identical viewport; with the
-                # RHI-based flush it updates). Harmless where not needed.
+                # SCHRODINGER_GL=on: Maestro's workspace is a QOpenGLWidget
+                # and with hardware GL (radeonsi, Mesa 26.1, KWin 6 on X11)
+                # its frames are never presented: the structure appears once,
+                # misplaced, and does not rotate; QT_WIDGETS_RHI=1 makes it
+                # update but flickers on every pointer move. EGL, vsync off,
+                # buffer_age off, Vulkan RHI and the system glvnd change
+                # nothing (measured 2026-10-27 on tux-umac: pixel-identical
+                # viewport after 30 rotate events). The bundled software Mesa
+                # presents correctly (multi-threaded llvmpipe, GPU idle):
+                # acceptable for small systems. Unset it to retry hardware GL,
+                # e.g. under a Wayland session.
                 if [[ -r /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ]]; then
                     maestro() {
                         LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 \
-                        QT_WIDGETS_RHI=1 \
+                        SCHRODINGER_GL=on \
                             "$SCHRODINGER/maestro" "$@"
                     }
                 fi
