@@ -287,9 +287,17 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
                 # (RX 580, radeonsi, Mesa 26.1) where libgallium links
                 # libLLVM.so.20.1 (GLIBCXX_3.4.32) and Maestro aborts without
                 # the preload, opens fine with it.
+                # QT_WIDGETS_RHI=1: with Maestro's bundled Qt 6.5 on X11 the
+                # workspace (a QOpenGLWidget) is composed into the window by
+                # the software backing store and its frames are never
+                # presented: the structure appears once, misplaced, and does
+                # not rotate (verified 2026-10-27 on tux-umac, radeonsi, Mesa
+                # 26.1: 30 rotate events, pixel-identical viewport; with the
+                # RHI-based flush it updates). Harmless where not needed.
                 if [[ -r /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ]]; then
                     maestro() {
                         LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 \
+                        QT_WIDGETS_RHI=1 \
                             "$SCHRODINGER/maestro" "$@"
                     }
                 fi
