@@ -283,6 +283,10 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
                 # driver fails to load, GLX reports no fbconfig and Maestro
                 # aborts in QOpenGLContext::create(). Preloading the newer
                 # system libstdc++ (backward compatible) restores native GL.
+                # Not an llvmpipe-only issue: verified 2026-10-27 on tux-umac
+                # (RX 580, radeonsi, Mesa 26.1) where libgallium links
+                # libLLVM.so.20.1 (GLIBCXX_3.4.32) and Maestro aborts without
+                # the preload, opens fine with it.
                 if [[ -r /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ]]; then
                     maestro() {
                         LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 \
