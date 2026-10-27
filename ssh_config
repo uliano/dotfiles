@@ -54,6 +54,11 @@ Host tuxtail
 Host tuxedotail
   Hostname 100.80.229.95
 
+# tux-umac over Tailscale (tux-umac.tail902a66.ts.net); in the office use tux-umac
+Host tuxumactail
+  Hostname 100.98.193.64
+  User uliano
+
 Host riscv
   HostName 192.168.1.22
   User uliano
