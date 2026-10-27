@@ -270,7 +270,7 @@ elif [[ "$OS_TYPE" == "linux" ]]; then
 
         # Schrodinger: the two install locations are mutually exclusive, so
         # the first match wins.
-        for _schro in /sw/schrodinger2025-3 /opt/schrodinger2025-3; do
+        for _schro in /sw/schrodinger2026-3 /opt/schrodinger2026-3; do
             if [[ -x "$_schro/run" ]]; then
                 export SCHRODINGER="$_schro"
                 # Appended: generic launcher names (run, xtb, blast) must not
