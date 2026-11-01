@@ -62,7 +62,7 @@
       "effortLevel": "high"
     }
   },
-  "tui": "fullscreen",
+  "tui": "default",
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
   "switchModelsOnFlag": false,
