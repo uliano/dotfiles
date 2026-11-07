@@ -175,6 +175,10 @@ export LANG=en_US.UTF-8
 # Safety: some config tools prefer bash
 export CONFIG_SHELL=/bin/bash
 
+# Keep Python bytecode out of source trees: __pycache__ inside synced folders
+# (pCloud) produces spurious conflict copies when several machines touch them.
+export PYTHONPYCACHEPREFIX="$HOME/.cache/pycache"
+
 # ====================================================================
 # OS DETECTION
 # ====================================================================

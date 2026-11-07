@@ -13,6 +13,10 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $env:LANG = "en_US.UTF-8"
 $env:LC_ALL = "en_US.UTF-8"
 
+# Keep Python bytecode out of source trees: __pycache__ inside synced folders
+# (pCloud) produces spurious conflict copies when several machines touch them.
+$env:PYTHONPYCACHEPREFIX = "$env:LOCALAPPDATA\pycache"
+
 # ====================================================================
 # PSREADLINE CONFIGURATION (Enhanced History)
 # ====================================================================
